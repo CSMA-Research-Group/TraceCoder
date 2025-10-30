@@ -114,7 +114,8 @@ def check_correctness(problem: Dict, completion: str, timeout: float,
             _original_os_rmdir = _os_module.rmdir
             _original_shutil_rmtree = _shutil_module.rmtree
 
-            reliability_guard()
+            # Call reliability_guard and get the restore function
+            restore_func = reliability_guard()
 
             # Transform the test code to count individual assertions
             try:
@@ -139,6 +140,8 @@ def check_correctness(problem: Dict, completion: str, timeout: float,
                 _os_module.getcwd = _original_os_getcwd
                 _os_module.rmdir = _original_os_rmdir
                 _shutil_module.rmtree = _original_shutil_rmtree
+                # Restore guarded functions
+                restore_func()
                 return
 
             # Construct the check program using the compiled transformed test
@@ -194,6 +197,8 @@ def check_correctness(problem: Dict, completion: str, timeout: float,
                 _os_module.getcwd = _original_os_getcwd
                 _os_module.rmdir = _original_os_rmdir
                 _shutil_module.rmtree = _original_shutil_rmtree
+                # Restore guarded functions
+                restore_func()
 
     manager = multiprocessing.Manager()
     execution_result_details_list = manager.list()
@@ -263,10 +268,6 @@ def check_correctness(problem: Dict, completion: str, timeout: float,
 
 
 # --- Other helper functions (time_limit, swallow_io, create_tempdir, etc.) remain the same ---
-# ... (ensure TimeoutException, WriteOnlyStringIO, redirect_stdin, chdir, reliability_guard are defined as before)
-# (Make sure to copy them here if running this snippet standalone)
-
-# Placeholder for other functions for completeness if you run this
 @contextlib.contextmanager
 def time_limit(seconds: float):
     if platform.system() == "Windows":  # Fallback for Windows
@@ -295,7 +296,12 @@ def swallow_io():
 
 @contextlib.contextmanager
 def create_tempdir():
-    with tempfile.TemporaryDirectory() as dirname:
+    # 保存原始函数引用
+    import shutil
+    original_tempdir = tempfile.TemporaryDirectory
+    original_rmtree = shutil.rmtree
+    
+    with original_tempdir() as dirname:
         with chdir(dirname):
             yield dirname
 
@@ -323,17 +329,31 @@ def chdir(root):
     if root == ".":
         yield
         return
-    cwd = os.getcwd()
-    os.chdir(root)
+    # 保存原始函数引用
+    import os
+    original_chdir = os.chdir
+    original_getcwd = os.getcwd
+    cwd = original_getcwd()
+    original_chdir(root)
     try:
         yield
     except BaseException as exc:
         raise exc
     finally:
-        os.chdir(cwd)
+        # 使用原始函数引用，避免因函数被覆盖而导致的问题
+        try:
+            original_chdir(cwd)
+        except:
+            # 如果无法切换回原目录，记录日志但不抛出异常
+            pass
 
 
 def reliability_guard(maximum_memory_bytes: Optional[int] = None):
+    """
+    This function enhances the safety of executing untrusted code by limiting system resources and 
+    disabling potentially dangerous built-in functions. It should be called before executing 
+    candidate code in a sandboxed environment.
+    """
     if maximum_memory_bytes is not None:
         if platform.system() != "Windows":
             import resource
@@ -342,20 +362,65 @@ def reliability_guard(maximum_memory_bytes: Optional[int] = None):
             if not platform.uname().system == 'Darwin':
                 resource.setrlimit(resource.RLIMIT_STACK, (maximum_memory_bytes, maximum_memory_bytes))
     faulthandler.disable()
+    
     import builtins
+    original_exit = builtins.exit
+    original_quit = builtins.quit
     builtins.exit = None
     builtins.quit = None
+    
     import os as guarded_os, shutil as guarded_shutil, subprocess as guarded_subprocess, sys as guarded_sys
     guarded_os.environ['OMP_NUM_THREADS'] = '1'
-    for module in [guarded_os, guarded_shutil, guarded_subprocess]:  # type: ignore
+    
+    # 保存原始函数引用
+    original_functions = {}
+    for module, module_name in [(guarded_os, 'os'), (guarded_shutil, 'shutil'), (guarded_subprocess, 'subprocess')]:
         for attr in ['kill', 'system', 'putenv', 'remove', 'removedirs', 'rmdir', 'setuid',
                      'fork', 'forkpty', 'killpg', 'rename', 'renames', 'truncate', 'replace',
                      'unlink', 'fchmod', 'fchown', 'chmod', 'chown', 'chroot', 'lchflags',
                      'lchmod', 'lchown', 'getcwd', 'chdir', 'rmtree', 'move', 'Popen']:
-            if hasattr(module, attr): setattr(module, attr, None)
+            if hasattr(module, attr):
+                original_functions[f"{module_name}.{attr}"] = getattr(module, attr)
+                setattr(module, attr, None)
+    
+    original_help = None
     if isinstance(__builtins__, dict):
+        original_help = __builtins__.get('help')
         __builtins__['help'] = None
     else:
+        original_help = builtins.help
         builtins.help = None
+    
+    original_modules = {}
     for mod_name in ['ipdb', 'joblib', 'resource', 'psutil', 'tkinter']:
+        if mod_name in guarded_sys.modules:
+            original_modules[mod_name] = guarded_sys.modules[mod_name]
         guarded_sys.modules[mod_name] = None
+    
+    # 返回恢复函数
+    def restore_functions():
+        # 恢复builtins
+        builtins.exit = original_exit
+        builtins.quit = original_quit
+        if isinstance(__builtins__, dict):
+            if original_help is not None:
+                __builtins__['help'] = original_help
+            elif 'help' in __builtins__:
+                del __builtins__['help']
+        else:
+            builtins.help = original_help
+        
+        # 恢复模块函数
+        for module, module_name in [(guarded_os, 'os'), (guarded_shutil, 'shutil'), (guarded_subprocess, 'subprocess')]:
+            for attr in ['kill', 'system', 'putenv', 'remove', 'removedirs', 'rmdir', 'setuid',
+                         'fork', 'forkpty', 'killpg', 'rename', 'renames', 'truncate', 'replace',
+                         'unlink', 'fchmod', 'fchown', 'chmod', 'chown', 'chroot', 'lchflags',
+                         'lchmod', 'lchown', 'getcwd', 'chdir', 'rmtree', 'move', 'Popen']:
+                if f"{module_name}.{attr}" in original_functions:
+                    setattr(module, attr, original_functions[f"{module_name}.{attr}"])
+        
+        # 恢复模块
+        for mod_name, mod in original_modules.items():
+            guarded_sys.modules[mod_name] = mod
+    
+    return restore_functions

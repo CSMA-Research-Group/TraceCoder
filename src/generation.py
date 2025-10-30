@@ -2,7 +2,11 @@ import time
 import re
 import ast
 from typing import Tuple, Any, List
-import torch
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
 from openai import OpenAI, APIError, Timeout, RateLimitError
 from transformers import AutoTokenizer
 import logging # Added import
@@ -11,10 +15,18 @@ import logging # Added import
 from .postprocessing import extract_python_code
 
 # --- OpenAI/Compatible API Client Configuration ---
-client = OpenAI(
-    api_key="your_api_key_here",
-    base_url="your_base_url_here"
-)
+# 初始化一个空的client，在运行时动态配置
+client = None
+
+def get_client():
+    """获取或创建API客户端"""
+    global client
+    if client is None:
+        client = OpenAI(
+            api_key="your_api_key_here",
+            base_url="your_base_url_here"
+        )
+    return client
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -89,7 +101,9 @@ def extract_python_code_with_logic(text: str, remove_main: bool = True, remove_p
 # --- API Call Function ---
 def call_api(prompt, model, max_tokens_response=4096):
     try:
-        response = client.chat.completions.create(
+        # 使用get_client()确保我们使用的是正确配置的客户端
+        api_client = get_client()
+        response = api_client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system",
@@ -125,7 +139,7 @@ def generator(text: str, status: str, model_name: str, models=None, tokenizers=N
     Returns: (generated content, prompt_tokens, completion_tokens)
     """
     # If local models and tokenizers are provided
-    if models and tokenizers:
+    if models and tokenizers and TORCH_AVAILABLE:
         # Local model generation logic is preserved here
         messages = [{"role": "user", "content": text}]
         inputs = tokenizers.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt").to(
@@ -141,7 +155,8 @@ def generator(text: str, status: str, model_name: str, models=None, tokenizers=N
             generation = extract_python_code_with_logic(generation)
         # More status handling logic can be added for local models
 
-        torch.cuda.empty_cache()
+        if TORCH_AVAILABLE:
+            torch.cuda.empty_cache()
         return generation, prompt_tokens, completion_tokens
 
     # If using an API model

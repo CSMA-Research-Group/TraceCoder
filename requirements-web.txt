@@ -1,0 +1,7 @@
+flask==2.3.3
+pandas
+tqdm
+pebble
+litellm
+openai
+python-dotenv

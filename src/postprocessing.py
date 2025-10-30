@@ -16,16 +16,26 @@ def remove_main_block(code_string: str) -> str:
     """
     Removes the `if __name__ == "__main__":` block and its content from a Python code string.
     """
+    # Find the start of the main block
     main_block_match = re.search(r"if\s+__name__\s*==\s*['\"]__main__['\"]:", code_string, re.MULTILINE)
     if main_block_match:
-        return code_string[:main_block_match.start()].rstrip()
+        main_start = main_block_match.start()
+        # Find the end of the main block by looking for the next function definition or end of string
+        # This is a simplified approach - in practice, we'd need to parse the actual indentation
+        lines = code_string[main_start:].split('\n')
+        if len(lines) > 1:
+            # Simple heuristic: remove all lines from the main block start to the end
+            # This works for most cases where main is at the end of the file
+            return code_string[:main_start].rstrip()
+        else:
+            return code_string[:main_start].rstrip()
     return code_string
 
 def remove_test_section(input_str: str) -> str:
     """
-    Deletes lines starting with # Test or # test and all subsequent content from the string.
+    Deletes lines starting with # Test or # test (or Chinese # 测试用例) and all subsequent content from the string.
     """
-    match = re.search(r"^#\s*(test|example).*$", input_str, re.IGNORECASE | re.MULTILINE)
+    match = re.search(r"^#\s*(test|example|测试用例).*$", input_str, re.IGNORECASE | re.MULTILINE)
     if match:
         return input_str[:match.start()].rstrip()
     return input_str

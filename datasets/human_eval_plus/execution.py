@@ -323,6 +323,8 @@ def chdir(root):
     if root == ".":
         yield
         return
+    # 保存原始函数引用
+    import os
     cwd = os.getcwd()
     os.chdir(root)
     try:

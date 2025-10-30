@@ -1,0 +1,41 @@
+/* 可以在这里添加自定义CSS样式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.step-card {
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    border-left: 4px solid #6c5ce7;
+}
+
+.step-card.completed {
+    border-left-color: #00b894;
+    background-color: #f8fff9;
+}
+
+.step-card.in-progress {
+    border-left-color: #fdcb6e;
+    background-color: #fff9f0;
+}
+
+.step-card.pending {
+    border-left-color: #636e72;
+    background-color: #f8f9fa;
+}
+
+.code-block {
+    background-color: #2d3436;
+    color: #dfe6e9;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+}

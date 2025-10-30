@@ -71,7 +71,7 @@ A framework for code generation and self-debugging experiments, supporting evalu
 
 ## Directory Structure
 
-```plaintext
+```
 TraceCoder/
 ├── config.py               # Global configuration
 ├── trace_learn_coder.py    # Main execution entry point
@@ -150,3 +150,26 @@ python trace_learn_coder.py \
     --timeout 15 \                  # Adjust code execution timeout to 15 seconds
     --output-file ./results/my_exp.csv  # Custom results output path
 ```
+
+## Web Demo
+
+We also provide a web-based demo to visually demonstrate the TraceCoder workflow:
+
+### 1. Install Web Dependencies
+```bash
+pip install -r requirements-web.txt
+```
+
+### 2. Run the Web Demo
+```bash
+python web_demo/app.py
+```
+
+### 3. Access the Demo
+Open your browser and navigate to `http://localhost:5050` to interact with the TraceCoder demo.
+
+The web interface allows you to:
+- Select from predefined coding problems
+- Choose different language models
+- Visualize the 14-step TraceCoder process in real-time
+- View detailed information at each step of the workflow

@@ -1,4 +1,3 @@
-```python
 import re
 import time
 from itertools import islice
@@ -11,6 +10,7 @@ from reporting import format_check_correctness_result
 from src.generation import generator 
 from src.traceRunner import execute_code_and_capture_prints_last  # <<< New import
 from src.postprocessing import remove_main_block  # <<< New import for _parse_llm_response
+from src.simple_test_runner import simple_check_correctness  # 导入简化版测试函数
 
 
 # --- Helper Functions ---
@@ -19,8 +19,8 @@ def _parse_llm_output(llm_response: str):
     Parses the LLM's response string to extract the repair plan and 
     instrumentation suggestions. 
     The function looks for specific start and end markers to delimit the sections.
-    It also cleans up common artifacts like surrounding whitespace and markdown 
-    code fences (e.g., ```python ... ```). 
+    It also cleans up common artifacts like surrounding whitespace and code 
+    fences (e.g., ```python ... ```). 
     Args: 
         llm_response: The full string output from the language model. 
     Returns: 
@@ -41,7 +41,7 @@ def _parse_llm_output(llm_response: str):
         # Clean the extracted content: 
         # 1. Remove leading/trailing whitespace and newlines. 
         content = content.strip() 
-        # 2. Remove common markdown code fences if they exist. 
+        # 2. Remove common code fences if they exist. 
         if content.startswith("```python"): 
             content = content[len("```python"):].strip() 
         if content.startswith("```"): 
@@ -229,7 +229,7 @@ Detailed Repair Plan (Follow this plan carefully!):
 ```
 Your response MUST be in the specified format:
 Repaired CODE Part:
-```python
+``python
 [The part of the code you modified/added.]
 ```
 CODE:
@@ -243,38 +243,48 @@ END_CODE
 def _parse_implementation_output(response_text: str) -> str:
     """
     Parses the LLM's response from the implementation prompt to extract the full code.
-    This is a simplified parser for the "CODE:" block.
+    This improved parser better handles various formats of "CODE:" blocks.
     """
-    # Look for the CODE: block with ```python
-    full_code_match = re.search(r"CODE:\s*```python\n(.*?)\n```", response_text, re.DOTALL)
+    # First, try to find the CODE block with standard markers
+    # Look for CODE: followed by ```python or ```
+    code_block_pattern = r'CODE:\s*```(?:python)?\s*(.*?)\s*```'
+    full_code_match = re.search(code_block_pattern, response_text, re.DOTALL | re.IGNORECASE)
     if full_code_match:
         return full_code_match.group(1).strip()
     
-    # Fallback for ``` without language tag
-    full_code_match = re.search(r"CODE:\s*```\n(.*?)\n```", response_text, re.DOTALL)
-    if full_code_match:
-        return full_code_match.group(1).strip()
+    # Try to find a more general pattern for CODE block
+    code_section_pattern = r'CODE:\s*(.*?)(?=\n[A-Z_]+:|\n[A-Z][a-z]+|$)'
+    code_section_match = re.search(code_section_pattern, response_text, re.DOTALL)
+    if code_section_match:
+        potential_code = code_section_match.group(1).strip()
+        # Remove any remaining code fences
+        potential_code = re.sub(r'^```(?:python)?\s*', '', potential_code)
+        potential_code = re.sub(r'\s*```\s*$', '', potential_code)
+        return potential_code.strip()
 
-    # Fallback for cases where the code block is not perfectly formatted but follows CODE:
-    code_marker_match = re.search(r"CODE:(.*)", response_text, re.DOTALL | re.IGNORECASE)
-    if code_marker_match:
-        potential_code = code_marker_match.group(1).strip()
-        # Clean up potential markdown fences that might still be there
-        if potential_code.startswith("```python"):
-            potential_code = potential_code[len("```python"):].strip()
-        if potential_code.startswith("```"):
-            potential_code = potential_code[len("```"):].strip()
-        if potential_code.endswith("```"):
-            potential_code = potential_code[:-len("```")].strip()
-        return potential_code
+    # Last resort: try to extract any Python code block after "CODE:" marker
+    code_marker_idx = response_text.find('CODE:')
+    if code_marker_idx != -1:
+        code_section = response_text[code_marker_idx + 5:]  # Skip 'CODE:'
+        # Try to find any code block in the remaining text
+        code_block_match = re.search(r'```(?:python)?\s*(.*?)\s*```', code_section, re.DOTALL | re.IGNORECASE)
+        if code_block_match:
+            return code_block_match.group(1).strip()
+        # If no code block found, return the section after CODE: cleaned up
+        return code_section.strip()
 
     return "" # Return empty string if no code is found
 
 
-def _load_check_correctness_func(dataset_name: str) -> Callable:
+def _load_check_correctness_func(dataset_name: str, use_simple_tester: bool = True) -> Callable:
     """
     Dynamically loads and returns the corresponding check_correctness function based on the dataset name.
+    默认使用简化版测试函数
     """
+    if use_simple_tester:
+        # 默认使用简化版测试函数
+        return simple_check_correctness
+    
     try:
         module_path = DATASET_PATHS[dataset_name]["eval_module"]
         eval_module = importlib.import_module(module_path)
@@ -355,7 +365,7 @@ def _run_self_debugging(initial_code, initial_eval, problem_data, args, check_co
         eval_candidate = check_correctness_func_param(problem_data, candidate_code, args.timeout) # Use the passed-in function
         print(f"Candidate repair result: {format_check_correctness_result(eval_candidate)}")
 
-        attempt_log = {"attempt": attempt, "plan": plan, "eval_result": eval_candidate}
+        attempt_log = {"attempt": attempt, "plan": repair_plan, "eval_result": eval_candidate}
         log.append(attempt_log)
 
         if eval_candidate.get('passed'):
@@ -414,3 +424,7 @@ def process_problem(problem_data, task_id, args, check_correctness_func_param: C
 
     print(f"Problem {task_id} processing completed. Final result: {'Passed' if result['final_passed'] else 'Failed'}")
     return result
+
+
+# 导出一些函数供其他模块使用
+build_instrumentation_prompt = _build_instrumentation_prompt

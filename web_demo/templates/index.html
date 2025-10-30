@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TraceCoder 演示</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .step-card {
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            border-left: 4px solid #6c5ce7;
+        }
+        .step-card.completed {
+            border-left-color: #00b894;
+            background-color: #f8fff9;
+        }
+        .step-card.in-progress {
+            border-left-color: #fdcb6e;
+            background-color: #fff9f0;
+        }
+        .step-card.pending {
+            border-left-color: #636e72;
+            background-color: #f8f9fa;
+        }
+        .step-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        .code-block {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .example-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+            height: 100%;
+        }
+        .example-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+            margin: 0.5rem;
+        }
+        .flow-step.active {
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+        .flow-step.completed {
+            color: #00b894;
+        }
+        .flow-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        textarea {
+            font-family: 'Courier New', monospace;
+        }
+        .validation-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .validation-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .validation-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .config-hint {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+        .example-config {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h1><i class="fas fa-code-branch"></i> TraceCoder</h1>
+                    <p class="lead">基于轨迹驱动的多智能体代码自动生成与修复修复框架</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> 关于 TraceCoder</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>TraceCoder 是一个基于轨迹驱动的多智能体框架，通过模拟专家调试行为来自动修复大语言模型生成的代码。</p>
+                        <p>该框架采用模块化工作流程，包括：</p>
+                        <ul>
+                            <li>问题描述输入</li>
+                            <li>初始代码生成</li>
+                            <li>代码执行与测试</li>
+                            <li>多轮修复循环（插桩、分析、修复）</li>
+                            <li>历史学习机制(HLLM)和回滚机制(RM)</li>
+                        </ul>
+                        <p>在调试循环中，系统会展示HLLM和RM机制的实时更新，帮助用户理解框架如何学习和优化修复过程。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API配置部分 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h3><i class="fas fa-cog"></i> API配置</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="config-hint">
+                            <h6><i class="fas fa-lightbulb"></i> 配置提示</h6>
+                            <p>请确保您已正确配置以下信息：</p>
+                            <ul>
+                                <li><strong>API密钥</strong>：您的API服务提供商提供的密钥</li>
+                                <li><strong>基础URL</strong>：API服务的基础URL（只需要基础路径，不要包含/chat/completions）</li>
+                                <li><strong>模型名称</strong>：您要使用的模型名称</li>
+                            </ul>
+                        </div>
+                        <!-- <div class="example-config">
+                            <h6><i class="fas fa-info-circle"></i> 配置示例</h6>
+                            <ul>
+                                <li>基础URL: <code>http://127.0.0.1:7860/v1</code> (注意：不包含/chat/completions)</li>
+                                <li>API密钥: <code>123</code></li>
+                                <li>模型名称: 根据您的实际情况填写</li>
+                            </ul>
+                        </div> -->
+                        <div class="mb-3">
+                            <label for="api-key" class="form-label">API密钥</label>
+                            <input type="password" class="form-control" id="api-key" placeholder="请输入您的API密钥">
+                        </div>
+                        <div class="mb-3">
+                            <label for="base-url" class="form-label">基础URL (可选)</label>
+                            <input type="text" class="form-control" id="base-url" placeholder="请输入API的基础URL，例如：http://127.0.0.1:7860/v1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="model-name" class="form-label">模型名称</label>
+                            <input type="text" class="form-control" id="model-name" placeholder="请输入模型名称，例如：gemini-1.5-flash" value="gemini-1.5-flash">
+                        </div>
+                        <button class="btn btn-outline-primary" onclick="validateConfig()">
+                            <i class="fas fa-check-circle"></i> 验证配置
+                        </button>
+                        <div id="validation-result" class="validation-result" style="display: none;"></div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i> 注意：API密钥将仅在本次会话中使用，不会被保存到服务器。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 自定义问题输入部分 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h3><i class="fas fa-edit"></i> 输入自定义问题</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="problem-description" class="form-label">问题描述</label>
+                            <textarea class="form-control" id="problem-description" rows="4" placeholder="请输入问题描述，例如：编写一个函数来计算两个数的和..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="test-cases" class="form-label">测试用例</label>
+                            <textarea class="form-control" id="test-cases" rows="6" placeholder="请输入测试用例，例如：
+assert add(2, 3) == 5
+assert add(-1, 1) == 0
+assert add(0, 0) == 0"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <button class="btn btn-success btn-lg" onclick="runTraceCoder()" id="run-button">
+                            <i class="fas fa-play"></i> 运行 TraceCoder 流程
+                        </button>
+                        <button class="btn btn-danger btn-lg" onclick="stopTraceCoder()" id="stop-button" style="display: none;">
+                            <i class="fas fa-stop"></i> 停止 TraceCoder 流程
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4" id="process-flow" style="display: none;">
+            <div class="col-md-12">
+                <h3><i class="fas fa-project-diagram"></i> TraceCoder 工作流程</h3>
+                <div class="process-flow">
+                    <div class="flow-step" id="flow-step-1">
+                        <div class="flow-icon"><i class="fas fa-edit"></i></div>
+                        <div>问题输入</div>
+                    </div>
+                    <div class="flow-step" id="flow-step-2">
+                        <div class="flow-icon"><i class="fas fa-code"></i></div>
+                        <div>代码生成</div>
+                    </div>
+                    <div class="flow-step" id="flow-step-3">
+                        <div class="flow-icon"><i class="fas fa-play"></i></div>
+                        <div>执行代码</div>
+                    </div>
+                    <div class="flow-step" id="flow-step-4">
+                        <div class="flow-icon"><i class="fas fa-search"></i></div>
+                        <div>检查结果</div>
+                    </div>
+                    <div class="flow-step" id="flow-step-5-13">
+                        <div class="flow-icon"><i class="fas fa-sync-alt"></i></div>
+                        <div>调试循环</div>
+                    </div>
+                    <div class="flow-step" id="flow-step-14">
+                        <div class="flow-icon"><i class="fas fa-flag-checkered"></i></div>
+                        <div>完成</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加HLLM和RM机制说明 -->
+        <div class="row mb-4" id="mechanisms-info" style="display: none;">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cogs"></i> 核心机制说明</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-book"></i> HLLM（历史学习机制）</h6>
+                                <p>HLLM记录每次修复尝试的经验，帮助系统避免重复相同的错误。</p>
+                                <ul>
+                                    <li>记录失败的修复计划和测试结果</li>
+                                    <li>在后续修复中提供历史参考</li>
+                                    <li>帮助系统学习并避免重复错误</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-undo"></i> RM（回滚机制）</h6>
+                                <p>RM跟踪最佳代码版本，当修复尝试表现不佳时回滚到最佳版本。</p>
+                                <ul>
+                                    <li>维护最佳代码版本</li>
+                                    <li>检测性能退化</li>
+                                    <li>防止连续无改善的修复尝试</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div id="steps-container">
+                    <!-- 步骤将在这里动态添加 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 添加全局变量来跟踪当前运行状态
+        let currentStreamReader = null;
+        let isRunning = false;
+
+        function validateConfig() {
+            const modelName = document.getElementById('model-name').value;
+            const apiKey = document.getElementById('api-key').value;
+            const baseUrl = document.getElementById('base-url').value;
+            
+            if (!apiKey) {
+                showValidationResult('error', '请填写API密钥');
+                return;
+            }
+            
+            if (!modelName) {
+                showValidationResult('error', '请填写模型名称');
+                return;
+            }
+            
+            // 显示验证中状态
+            showValidationResult('info', '正在验证配置...');
+            
+            // 发送请求到后端进行验证
+            fetch('/api/validate_config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model_name: modelName,
+                    api_key: apiKey,
+                    base_url: baseUrl
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    showValidationResult('success', data.message);
+                } else {
+                    showValidationResult('error', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showValidationResult('error', '验证过程中发生错误: ' + error.message);
+            });
+        }
+        
+        function showValidationResult(type, message) {
+            const resultDiv = document.getElementById('validation-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = message;
+            
+            // 移除所有类
+            resultDiv.classList.remove('validation-success', 'validation-error');
+            
+            // 根据类型添加相应的类
+            if (type === 'success') {
+                resultDiv.classList.add('validation-success');
+            } else {
+                resultDiv.classList.add('validation-error');
+            }
+        }
+
+        function runTraceCoder() {
+            const problemDescription = document.getElementById('problem-description').value;
+            const testCases = document.getElementById('test-cases').value;
+            const modelName = document.getElementById('model-name').value;
+            const apiKey = document.getElementById('api-key').value;
+            const baseUrl = document.getElementById('base-url').value;
+            
+            if (!problemDescription || !testCases) {
+                alert('请填写问题描述和测试用例');
+                return;
+            }
+            
+            if (!apiKey) {
+                alert('请填写API密钥');
+                return;
+            }
+            
+            if (!modelName) {
+                alert('请填写模型名称');
+                return;
+            }
+            
+            // 设置运行状态
+            isRunning = true;
+            document.getElementById('run-button').style.display = 'none';
+            document.getElementById('stop-button').style.display = 'inline-block';
+            
+            // 显示流程图
+            document.getElementById('process-flow').style.display = 'block';
+            
+            // 显示HLLM和RM机制说明
+            document.getElementById('mechanisms-info').style.display = 'block';
+            
+            // 清空之前的步骤
+            document.getElementById('steps-container').innerHTML = '';
+            
+            // 使用EventSource进行服务器发送事件
+            const eventData = {
+                problem_description: problemDescription,
+                test_cases: testCases,
+                model_name: modelName,
+                api_key: apiKey,
+                base_url: baseUrl
+            };
+            
+            fetch('/api/run_tracecoder_stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(eventData)
+            })
+            .then(response => {
+                const reader = response.body.getReader();
+                currentStreamReader = reader; // 保存reader引用以便停止
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            console.log('Stream complete');
+                            // 恢复按钮状态
+                            isRunning = false;
+                            document.getElementById('run-button').style.display = 'inline-block';
+                            document.getElementById('stop-button').style.display = 'none';
+                            return;
+                        }
+                        
+                        // 检查是否已停止
+                        if (!isRunning) {
+                            reader.cancel();
+                            return;
+                        }
+                        
+                        // 将新数据添加到缓冲区
+                        buffer += decoder.decode(value, { stream: true });
+                        
+                        // 处理完整的数据行
+                        const lines = buffer.split('\n\n');
+                        buffer = lines.pop(); // 保留不完整的行
+                        
+                        lines.forEach(line => {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const jsonData = line.substring(6); // 移除 'data: ' 前缀
+                                    const step = JSON.parse(jsonData);
+                                    
+                                    // 检查是否有错误
+                                    if (step.error) {
+                                        throw new Error(step.error);
+                                    }
+                                    
+                                    // 添加或更新步骤
+                                    addOrUpdateStep(step);
+                                    
+                                    // 更新流程图状态
+                                    updateFlowStatus([step]);
+                                } catch (e) {
+                                    console.error('Error parsing JSON:', e);
+                                    document.getElementById('steps-container').innerHTML += `
+                                        <div class="alert alert-danger">
+                                            <h4><i class="fas fa-exclamation-triangle"></i> 错误</h4>
+                                            <p>解析数据时发生错误: ${e.message}</p>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        });
+                        
+                        // 继续读取流
+                        readStream();
+                    }).catch(error => {
+                        console.error('Error reading stream:', error);
+                        document.getElementById('steps-container').innerHTML += `
+                            <div class="alert alert-danger">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 错误</h4>
+                                <p>读取数据流时发生错误: ${error.message}</p>
+                            </div>
+                        `;
+                        // 恢复按钮状态
+                        isRunning = false;
+                        document.getElementById('run-button').style.display = 'inline-block';
+                        document.getElementById('stop-button').style.display = 'none';
+                    });
+                }
+                
+                readStream();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('steps-container').innerHTML += `
+                    <div class="alert alert-danger">
+                        <h4><i class="fas fa-exclamation-triangle"></i> 错误</h4>
+                        <p>启动 TraceCoder 时发生错误: ${error.message}</p>
+                    </div>
+                `;
+                // 恢复按钮状态
+                isRunning = false;
+                document.getElementById('run-button').style.display = 'inline-block';
+                document.getElementById('stop-button').style.display = 'none';
+            });
+        }
+
+        // 新增停止TraceCoder函数
+        function stopTraceCoder() {
+            if (isRunning && currentStreamReader) {
+                // 发送停止请求到后端
+                fetch('/api/stop_tracecoder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Stop request sent:', data);
+                })
+                .catch(error => {
+                    console.error('Error sending stop request:', error);
+                });
+                
+                // 取消流读取
+                isRunning = false;
+                currentStreamReader.cancel();
+                currentStreamReader = null;
+                
+                // 恢复按钮状态
+                document.getElementById('run-button').style.display = 'inline-block';
+                document.getElementById('stop-button').style.display = 'none';
+                
+                // 显示停止提示
+                document.getElementById('steps-container').innerHTML += `
+                    <div class="alert alert-warning">
+                        <h4><i class="fas fa-stop"></i> 已停止</h4>
+                        <p>TraceCoder 流程已被用户停止。</p>
+                    </div>
+                `;
+            }
+        }
+
+        function addOrUpdateStep(step) {
+            const container = document.getElementById('steps-container');
+            const stepClass = getStepClass(step.status);
+            const icon = getStepIcon(step.status);
+            
+            // 检查是否已存在该步骤，如果存在则更新而不是添加
+            const existingStep = document.getElementById(`step-${step.step}`);
+            if (existingStep) {
+                // 更新现有步骤
+                existingStep.className = `card step-card ${stepClass}`;
+                existingStep.innerHTML = `
+                    <div class="card-header">
+                        <h5>
+                            ${icon}
+                            步骤 ${step.step}: ${step.title}
+                            <span class="float-end">${getStatusBadge(step.status)}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">${step.description}</p>
+                        ${step.content ? `
+                        <div class="mt-3">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#content-${step.step}" aria-expanded="false" 
+                                    aria-controls="content-${step.step}">
+                                <i class="fas fa-eye"></i> 查看详情
+                            </button>
+                            <div class="collapse mt-2" id="content-${step.step}">
+                                <div class="code-block">${escapeHtml(step.content)}</div>
+                                ${step.details ? `<div class="code-block mt-2">${escapeHtml(step.details)}</div>` : ''}
+                            </div>
+                        </div>` : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            // 创建新步骤
+            const stepElement = document.createElement('div');
+            stepElement.id = `step-${step.step}`;
+            stepElement.className = `card step-card ${stepClass}`;
+            stepElement.innerHTML = `
+                <div class="card-header">
+                    <h5>
+                        ${icon}
+                        步骤 ${step.step}: ${step.title}
+                        <span class="float-end">${getStatusBadge(step.status)}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">${step.description}</p>
+                    ${step.content ? `
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#content-${step.step}" aria-expanded="false" 
+                                aria-controls="content-${step.step}">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </button>
+                        <div class="collapse mt-2" id="content-${step.step}">
+                            <div class="code-block">${escapeHtml(step.content)}</div>
+                            ${step.details ? `<div class="code-block mt-2">${escapeHtml(step.details)}</div>` : ''}
+                        </div>
+                    </div>` : ''}
+                </div>
+            `;
+            
+            container.appendChild(stepElement);
+        }
+
+        function getStepClass(status) {
+            switch(status) {
+                case 'completed': return 'completed';
+                case 'in-progress': return 'in-progress';
+                case 'pending': return 'pending';
+                default: return '';
+            }
+        }
+
+        function getStepIcon(status) {
+            switch(status) {
+                case 'completed': return '<i class="fas fa-check-circle step-icon text-success"></i>';
+                case 'in-progress': return '<i class="fas fa-spinner step-icon text-warning"></i>';
+                case 'pending': return '<i class="fas fa-clock step-icon text-secondary"></i>';
+                default: return '<i class="fas fa-question-circle step-icon"></i>';
+            }
+        }
+
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'completed': return '<span class="badge bg-success">已完成</span>';
+                case 'in-progress': return '<span class="badge bg-warning">进行中</span>';
+                case 'pending': return '<span class="badge bg-secondary">待处理</span>';
+                case 'error': return '<span class="badge bg-danger">错误</span>';
+                default: return '<span class="badge bg-info">未知</span>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function updateFlowStatus(steps) {
+            // 重置所有步骤状态
+            document.querySelectorAll('.flow-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            
+            // 根据已完成的步骤更新流程图
+            steps.forEach(step => {
+                if (step.status === 'completed') {
+                    if (step.step >= 1 && step.step <= 4) {
+                        document.getElementById(`flow-step-${step.step}`).classList.add('completed');
+                    } else if (step.step >= 5 && step.step <= 13) {
+                        document.getElementById('flow-step-5-13').classList.add('completed');
+                    } else if (step.step >= 14) {
+                        document.getElementById('flow-step-14').classList.add('completed');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
