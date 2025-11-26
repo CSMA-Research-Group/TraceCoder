@@ -1,0 +1,171 @@
+﻿task_id,model,dataset,method_instrumentation,method_two_step_repair,direct_gen_code,direct_gen_eval,direct_gen_passed,final_code,final_eval,final_passed,stopped_reason,total_prompt_tokens,total_completion_tokens,processing_time_seconds
+HumanEval/0,gemini-2.5-flash,humaneval,True,True,"from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""
+    n = len(numbers)
+    # Iterate through all possible pairs of numbers
+    for i in range(n):
+        for j in range(i + 1, n):  # Start j from i + 1 to avoid comparing a number with itself and duplicate pairs
+            # Calculate the absolute difference between the two numbers
+            difference = abs(numbers[i] - numbers[j])
+            # If the difference is less than the threshold, we found a close pair
+            if difference < threshold:
+                return True
+    # If no such pair is found after checking all combinations, return False
+    return False","{""task_id"": ""HumanEval/0"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 1006, ""failed_count"": 0, ""total_count"": 0}",True,"from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""
+    n = len(numbers)
+    # Iterate through all possible pairs of numbers
+    for i in range(n):
+        for j in range(i + 1, n):  # Start j from i + 1 to avoid comparing a number with itself and duplicate pairs
+            # Calculate the absolute difference between the two numbers
+            difference = abs(numbers[i] - numbers[j])
+            # If the difference is less than the threshold, we found a close pair
+            if difference < threshold:
+                return True
+    # If no such pair is found after checking all combinations, return False
+    return False","{""task_id"": ""HumanEval/0"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 1006, ""failed_count"": 0, ""total_count"": 0}",True,Passed on direct generation,144,269,6.933271408081055
+HumanEval/1,gemini-2.5-flash,humaneval,True,True,"from typing import List
+
+
+def separate_paren_groups(paren_string: str) -> List[str]:
+    """""" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to
+    separate those group into separate strings and return the list of those.
+    Separate groups are balanced (each open brace is properly closed) and not nested within each other
+    Ignore any spaces in the input string.
+    >>> separate_paren_groups('( ) (( )) (( )( ))')
+    ['()', '(())', '(()())']
+    """"""
+    # Step 1: Ignore any spaces in the input string
+    cleaned_string = paren_string.replace("" "", """")
+
+    groups: List[str] = []
+    current_group: str = """"
+    balance: int = 0
+
+    # Step 2: Iterate through each character of the cleaned string
+    for char in cleaned_string:
+        # Append the character to the current group being built
+        current_group += char
+
+        # Update the balance counter
+        if char == '(':
+            balance += 1
+        elif char == ')':
+            balance -= 1
+
+        # Step 3 & 4: If balance returns to 0, a complete top-level group is found
+        if balance == 0:
+            groups.append(current_group)  # Add the complete group to the results
+            current_group = """"            # Reset current_group for the next one
+
+    return groups","{""task_id"": ""HumanEval/1"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 1004, ""failed_count"": 0, ""total_count"": 0}",True,"from typing import List
+
+
+def separate_paren_groups(paren_string: str) -> List[str]:
+    """""" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to
+    separate those group into separate strings and return the list of those.
+    Separate groups are balanced (each open brace is properly closed) and not nested within each other
+    Ignore any spaces in the input string.
+    >>> separate_paren_groups('( ) (( )) (( )( ))')
+    ['()', '(())', '(()())']
+    """"""
+    # Step 1: Ignore any spaces in the input string
+    cleaned_string = paren_string.replace("" "", """")
+
+    groups: List[str] = []
+    current_group: str = """"
+    balance: int = 0
+
+    # Step 2: Iterate through each character of the cleaned string
+    for char in cleaned_string:
+        # Append the character to the current group being built
+        current_group += char
+
+        # Update the balance counter
+        if char == '(':
+            balance += 1
+        elif char == ')':
+            balance -= 1
+
+        # Step 3 & 4: If balance returns to 0, a complete top-level group is found
+        if balance == 0:
+            groups.append(current_group)  # Add the complete group to the results
+            current_group = """"            # Reset current_group for the next one
+
+    return groups","{""task_id"": ""HumanEval/1"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 1004, ""failed_count"": 0, ""total_count"": 0}",True,Passed on direct generation,134,595,14.42949891090393
+HumanEval/2,gemini-2.5-flash,humaneval,True,True,"def truncate_number(number: float) -> float:
+    """""" Given a positive floating point number, it can be decomposed into
+    and integer part (largest integer smaller than given number) and decimals
+    (leftover part always smaller than 1).
+
+    Return the decimal part of the number.
+    >>> truncate_number(3.5)
+    0.5
+    """"""
+    integer_part = int(number)
+    decimal_part = number - integer_part
+    return decimal_part","{""task_id"": ""HumanEval/2"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 974, ""failed_count"": 0, ""total_count"": 0}",True,"def truncate_number(number: float) -> float:
+    """""" Given a positive floating point number, it can be decomposed into
+    and integer part (largest integer smaller than given number) and decimals
+    (leftover part always smaller than 1).
+
+    Return the decimal part of the number.
+    >>> truncate_number(3.5)
+    0.5
+    """"""
+    integer_part = int(number)
+    decimal_part = number - integer_part
+    return decimal_part","{""task_id"": ""HumanEval/2"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 974, ""failed_count"": 0, ""total_count"": 0}",True,Passed on direct generation,98,115,3.0293102264404297
+HumanEval/3,gemini-2.5-flash,humaneval,True,True,"from typing import List
+
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""
+    balance = 0
+    for op in operations:
+        balance += op
+        if balance < 0:
+            return True
+    return False","{""task_id"": ""HumanEval/3"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 903, ""failed_count"": 0, ""total_count"": 0}",True,"from typing import List
+
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""
+    balance = 0
+    for op in operations:
+        balance += op
+        if balance < 0:
+            return True
+    return False","{""task_id"": ""HumanEval/3"", ""passed"": true, ""result"": ""passed"", ""completion_id"": null, ""passed_count"": 903, ""failed_count"": 0, ""total_count"": 0}",True,Passed on direct generation,136,161,5.211141347885132
