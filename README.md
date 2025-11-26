@@ -150,3 +150,32 @@ python trace_learn_coder.py \
     --timeout 15 \                  # Adjust code execution timeout to 15 seconds
     --output-file ./results/my_exp.csv  # Custom results output path
 ```
+
+---
+
+## 📚 Citation
+
+If you use TraceCoder in your research, please cite our ICSE 2026 paper:
+
+### ACM Reference Format
+Jiangping Huang, Wenguang Ye, Weisong Sun, Jian Zhang, Mingyue Zhang,  
+and Yang Liu. 2026. **TraceCoder: A Trace-Driven Multi-Agent Framework  
+for Automated Debugging of LLM-Generated Code.**  
+In *48th International Conference on Software Engineering (ICSE ’26)*,  
+April 12–18, 2026, Rio de Janeiro, Brazil. ACM, New York, NY, USA, 13 pages.
+
+### BibTeX
+```bibtex
+@inproceedings{huang2026tracecoder,
+  author       = {Jiangping Huang and Wenguang Ye and Weisong Sun 
+                  and Jian Zhang and Mingyue Zhang and Yang Liu},
+  title        = {TraceCoder: A Trace-Driven Multi-Agent Framework 
+                  for Automated Debugging of LLM-Generated Code},
+  booktitle    = {Proceedings of the 48th International Conference on 
+                  Software Engineering (ICSE ’26)},
+  year         = {2026},
+  month        = apr,
+  address      = {Rio de Janeiro, Brazil},
+  publisher    = {ACM},
+  pages        = {1--13}
+}
