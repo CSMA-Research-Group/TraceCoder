@@ -1,0 +1,838 @@
+{% extends "base.html" %}
+
+{% block title %}TraceCoder - 偏好设置{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 页面专属布局和卡片美化 */
+.settings-header {
+    margin-bottom: 2rem;
+}
+
+.settings-header h2 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-main);
+}
+
+.settings-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.settings-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.settings-title i {
+    color: var(--primary-color);
+    background: var(--primary-light);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-right: 12px;
+    font-size: 0.95rem;
+}
+
+/* 表单元素美化 */
+.form-label {
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.9rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background-color: #f8fafc;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+/* 按钮统一美化 */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+/* 模型卡片重设计 */
+.model-card {
+    border: 2px solid #f1f5f9;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #ffffff;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.model-card:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.model-card.selected {
+    border-color: var(--primary-color);
+    background: #f5f8ff;
+}
+
+.model-card.selected::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.model-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.model-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+}
+
+/* 模型选择区域 */
+.model-selection-area {
+    min-height: 200px;
+}
+
+.model-selection-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    border: 2px dashed #e2e8f0;
+    color: #94a3b8;
+}
+
+.model-selection-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+/* 模型列表滚动容器 */
+.model-list-scroll-container {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.model-list-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.model-list-scroll-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.model-list-scroll-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.model-list-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 主题选项美化 */
+.theme-option {
+    border: 2px solid #f1f5f9;
+    border-radius: var(--radius-md);
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    background: #fff;
+}
+
+.theme-option:hover {
+    transform: scale(1.03);
+    border-color: #cbd5e1;
+}
+
+.theme-option.selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+.theme-preview {
+    height: 60px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.theme-option.light .theme-preview { background: #f8fafc; }
+.theme-option.dark .theme-preview { background: #0f172a; }
+.theme-option.auto .theme-preview { background: linear-gradient(135deg, #f8fafc 50%, #0f172a 50%); }
+
+.theme-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+/* 状态徽章 */
+.config-status {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.status-dot.success { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.4); }
+.status-dot.error { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+.status-dot.pending { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+
+.status-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+/* 加载动画 */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row settings-header">
+        <div class="col-12">
+            <h2>设置</h2>
+            <p class="text-muted mb-0">管理您的 API 连接、模型偏好和界面展示</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 左侧主配置区 -->
+        <div class="col-lg-8">
+            <!-- API 配置卡片 -->
+            <div class="settings-card">
+                <div class="settings-title"><i class="fas fa-key"></i>API 核心配置</div>
+                
+                <div class="mb-4">
+                    <label class="form-label">API 基础 URL <span class="text-muted fw-normal">(选填)</span></label>
+                    <input type="text" class="form-control" id="baseUrl" placeholder="例如: https://api.openai.com/v1">
+                    <small class="text-muted mt-2 d-block">使用第三方代理或兼容平台时填写。无需包含 <code>/chat/completions</code>。</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">API 密钥 <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="apiKey" placeholder="输入您的平台 API 密钥">
+                        <button class="btn btn-light border border-start-0" type="button" onclick="toggleApiKey()" style="border-color: #cbd5e1 !important; background: #fff;">
+                            <i class="fas fa-eye text-muted" id="apiKeyToggleIcon"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted mt-2 d-block"><i class="fas fa-shield-alt me-1"></i>安全提示：密钥仅保留在您的浏览器本地缓存中，不会被上传到任何中心服务器。</small>
+                </div>
+                
+                <div class="d-flex gap-3 pt-2 border-top mt-4">
+                    <button class="btn btn-primary" onclick="saveApiConfig()">
+                        <i class="fas fa-save me-2"></i>保存凭证
+                    </button>
+                    <button class="btn btn-outline-secondary text-dark" onclick="fetchModels()" id="fetchModelsBtn">
+                        <i class="fas fa-rotate me-2"></i>获取模型列表
+                    </button>
+                    <button class="btn btn-outline-secondary text-dark" onclick="testApiConnection()">
+                        <i class="fas fa-plug-circle-bolt me-2"></i>测试连通性
+                    </button>
+                </div>
+                
+                <div id="connectionStatus" class="mt-4" style="display: none;"></div>
+            </div>
+
+            <!-- 模型选择卡片 -->
+            <div class="settings-card">
+                <div class="settings-title"><i class="fas fa-robot"></i>模型选择</div>
+                
+                <div id="modelSelectionArea" class="model-selection-area">
+                    <!-- 默认显示提示 -->
+                    <div class="model-selection-placeholder" id="modelPlaceholder">
+                        <i class="fas fa-microchip"></i>
+                        <h5 class="mb-2">请先配置 API</h5>
+                        <p class="mb-0 text-center">配置 API URL 和密钥后，点击"获取模型列表"按钮<br>即可查看并选择可用的模型</p>
+                    </div>
+                    
+                    <!-- 模型列表容器 -->
+                    <div id="modelListContainer" style="display: none;">
+                        <p class="text-muted mb-3"><i class="fas fa-info-circle me-1"></i>选择您要使用的模型：</p>
+                        <div class="model-list-scroll-container">
+                            <div class="row g-3" id="modelList">
+                                <!-- 动态加载模型卡片 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 运行参数卡片 -->
+            <div class="settings-card mb-lg-0">
+                <div class="settings-title"><i class="fas fa-sliders"></i>调试运行参数</div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label">最大迭代修复次数</label>
+                        <input type="number" class="form-control" id="maxDebugAttempts" value="3" min="1" max="10">
+                        <small class="text-muted mt-1 d-block">超过此数值若仍未修复将强制停止</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">单次执行超时 (秒)</label>
+                        <input type="number" class="form-control" id="timeout" value="10" min="5" max="60">
+                        <small class="text-muted mt-1 d-block">防止生成的代码陷入死循环</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">无改善回滚阈值</label>
+                        <input type="number" class="form-control" id="maxNoImprovement" value="2" min="1" max="5">
+                        <small class="text-muted mt-1 d-block">连续多少次无进展则触发智能回滚</small>
+                    </div>
+                </div>
+                
+                <div class="form-check form-switch mb-4 bg-light p-3 rounded-3 border d-flex align-items-center">
+                    <input class="form-check-input mt-0 ms-0 me-3" type="checkbox" id="enableInstrumentation" checked style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                    <div>
+                        <label class="form-check-label fw-bold d-block" for="enableInstrumentation">启用代码动态插桩 (Instrumentation)</label>
+                        <small class="text-muted">开启后可深入捕获变量轨迹，大幅提高修复准确率</small>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveRunParams()">
+                    <i class="fas fa-check me-2"></i>应用参数
+                </button>
+            </div>
+        </div>
+
+        <!-- 右侧副配置区 -->
+        <div class="col-lg-4">
+            
+            <!-- 状态面板卡片 -->
+            <div class="settings-card">
+                <div class="settings-title"><i class="fas fa-satellite-dish"></i>本地就绪状态</div>
+                
+                <div class="d-flex flex-column gap-2">
+                    <div class="config-status">
+                        <span class="status-dot pending" id="apiStatusDot"></span>
+                        <span class="status-text" id="apiStatusText">API 密钥未配置</span>
+                    </div>
+                    
+                    <div class="config-status">
+                        <span class="status-dot pending" id="modelStatusDot"></span>
+                        <span class="status-text" id="modelStatusText">模型未选择</span>
+                    </div>
+                    
+                    <div class="config-status">
+                        <span class="status-dot success" id="themeStatusDot"></span>
+                        <span class="status-text" id="themeStatusText">展示: 浅色模式</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主题设置卡片 -->
+            <div class="settings-card">
+                <div class="settings-title"><i class="fas fa-wand-magic-sparkles"></i>外观主题</div>
+                
+                <div class="row g-2">
+                    <div class="col-4">
+                        <div class="theme-option light selected" data-theme="light" onclick="selectTheme(this)">
+                            <div class="theme-preview"></div>
+                            <div class="theme-label">浅色</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="theme-option dark" data-theme="dark" onclick="selectTheme(this)">
+                            <div class="theme-preview"></div>
+                            <div class="theme-label">深色</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="theme-option auto" data-theme="auto" onclick="selectTheme(this)">
+                            <div class="theme-preview"></div>
+                            <div class="theme-label">跟随系统</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据管理卡片 -->
+            <div class="settings-card mb-0">
+                <div class="settings-title"><i class="fas fa-database"></i>本地数据管理</div>
+                <p class="text-muted small mb-4">您可以将历史记录和配置导出备份，或在多设备间进行迁移。</p>
+                
+                <div class="d-grid gap-3">
+                    <button class="btn btn-outline-primary bg-primary bg-opacity-10 border-primary border-opacity-25" onclick="exportAllData()">
+                        <i class="fas fa-cloud-arrow-down me-2"></i>备份导出数据
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="importData()">
+                        <i class="fas fa-cloud-arrow-up me-2"></i>恢复导入数据
+                    </button>
+                    
+                    <hr class="my-1 text-muted opacity-25">
+                    
+                    <button class="btn btn-outline-danger border-danger border-opacity-50 hover-danger" onclick="clearAllData()">
+                        <i class="fas fa-trash-can me-2"></i>清空所有缓存
+                    </button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedModel = '';
+let selectedTheme = 'light';
+let availableModels = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadConfig();
+});
+
+function loadConfig() {
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    
+    // 加载 API 配置
+    if (config.apiKey) {
+        document.getElementById('apiKey').value = config.apiKey;
+        document.getElementById('apiStatusDot').classList.remove('pending');
+        document.getElementById('apiStatusDot').classList.add('success');
+        document.getElementById('apiStatusText').textContent = 'API 已配置就绪';
+    }
+    
+    if (config.baseUrl) {
+        document.getElementById('baseUrl').value = config.baseUrl;
+    }
+    
+    // 加载模型配置
+    if (config.model) {
+        selectedModel = config.model;
+        document.getElementById('modelStatusDot').classList.remove('pending');
+        document.getElementById('modelStatusDot').classList.add('success');
+        document.getElementById('modelStatusText').textContent = '当前: ' + (config.modelName || config.model);
+        
+        // 如果有模型配置，尝试加载模型列表
+        if (config.apiKey) {
+            fetchModels(true);
+        }
+    }
+    
+    // 加载运行参数
+    if (config.maxDebugAttempts) {
+        document.getElementById('maxDebugAttempts').value = config.maxDebugAttempts;
+    }
+    if (config.timeout) {
+        document.getElementById('timeout').value = config.timeout;
+    }
+    if (config.maxNoImprovement) {
+        document.getElementById('maxNoImprovement').value = config.maxNoImprovement;
+    }
+    if (config.enableInstrumentation !== undefined) {
+        document.getElementById('enableInstrumentation').checked = config.enableInstrumentation;
+    }
+    
+    // 加载主题配置
+    if (config.theme) {
+        selectedTheme = config.theme;
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.theme === selectedTheme) {
+                opt.classList.add('selected');
+            }
+        });
+        document.getElementById('themeStatusText').textContent = '展示: ' + getThemeDisplayName(selectedTheme);
+    }
+}
+
+function getThemeDisplayName(theme) {
+    const names = {
+        'light': '浅色模式',
+        'dark': '深色模式',
+        'auto': '跟随系统'
+    };
+    return names[theme] || theme;
+}
+
+function toggleApiKey() {
+    const input = document.getElementById('apiKey');
+    const icon = document.getElementById('apiKeyToggleIcon');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function saveApiConfig() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const baseUrl = document.getElementById('baseUrl').value.trim();
+    
+    if (!apiKey) {
+        showToast('error', '验证失败', '请先输入有效的 API 密钥');
+        return;
+    }
+    
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    config.apiKey = apiKey;
+    config.baseUrl = baseUrl;
+    localStorage.setItem('tracecoder_config', JSON.stringify(config));
+    
+    document.getElementById('apiStatusDot').classList.remove('pending', 'error');
+    document.getElementById('apiStatusDot').classList.add('success');
+    document.getElementById('apiStatusText').textContent = 'API 已配置就绪';
+    
+    showToast('success', '保存成功', 'API 凭证已安全存储在本地缓存');
+}
+
+function fetchModels(silent = false) {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const baseUrl = document.getElementById('baseUrl').value.trim();
+    
+    if (!apiKey) {
+        if (!silent) {
+            showToast('error', '无法获取', '请先输入 API 密钥');
+        }
+        return;
+    }
+    
+    const btn = document.getElementById('fetchModelsBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner me-2"></span>获取中...';
+    btn.disabled = true;
+    
+    fetch('/api/models', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            api_key: apiKey,
+            base_url: baseUrl
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        if (data.error) {
+            if (!silent) {
+                showToast('error', '获取失败', data.error);
+            }
+            return;
+        }
+        
+        availableModels = data.models || [];
+        renderModelList();
+        
+        if (!silent) {
+            showToast('success', '获取成功', `已加载 ${availableModels.length} 个可用模型`);
+        }
+    })
+    .catch(error => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        if (!silent) {
+            showToast('error', '网络错误', error.message);
+        }
+    });
+}
+
+function renderModelList() {
+    const container = document.getElementById('modelList');
+    const placeholder = document.getElementById('modelPlaceholder');
+    const listContainer = document.getElementById('modelListContainer');
+    
+    if (availableModels.length === 0) {
+        placeholder.style.display = 'flex';
+        listContainer.style.display = 'none';
+        return;
+    }
+    
+    placeholder.style.display = 'none';
+    listContainer.style.display = 'block';
+    
+    container.innerHTML = availableModels.map((model, index) => {
+        const isSelected = model.id === selectedModel;
+        const icons = ['fa-bolt', 'fa-star', 'fa-brain', 'fa-wind', 'fa-gem', 'fa-feather-pointed'];
+        const colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary'];
+        const icon = icons[index % icons.length];
+        const color = colors[index % colors.length];
+        
+        return `
+            <div class="col-md-4 col-sm-6">
+                <div class="model-card ${isSelected ? 'selected' : ''}" data-model="${model.id}" data-name="${model.name}" onclick="selectModel(this)">
+                    <div class="model-icon-wrapper bg-${color} bg-opacity-10 text-${color}">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <h6 class="mb-1 fw-bold">${model.name}</h6>
+                    <div class="text-muted small">${model.description || ''}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function selectModel(element) {
+    document.querySelectorAll('.model-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    element.classList.add('selected');
+    selectedModel = element.dataset.model;
+    const modelName = element.dataset.name;
+    
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    config.model = selectedModel;
+    config.modelName = modelName;
+    localStorage.setItem('tracecoder_config', JSON.stringify(config));
+    
+    document.getElementById('modelStatusDot').classList.remove('pending', 'error');
+    document.getElementById('modelStatusDot').classList.add('success');
+    document.getElementById('modelStatusText').textContent = '当前: ' + modelName;
+    
+    showToast('success', '模型已选择', '已配置为 ' + modelName);
+}
+
+function selectTheme(element) {
+    document.querySelectorAll('.theme-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    element.classList.add('selected');
+    selectedTheme = element.dataset.theme;
+    
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    config.theme = selectedTheme;
+    localStorage.setItem('tracecoder_config', JSON.stringify(config));
+    
+    document.getElementById('themeStatusText').textContent = '展示: ' + getThemeDisplayName(selectedTheme);
+    applyTheme(selectedTheme);
+    showToast('success', '主题已切换', '界面已调整为 ' + getThemeDisplayName(selectedTheme));
+}
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+    } else if (theme === 'auto') {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.remove('dark-theme');
+        }
+    } else {
+        document.body.classList.remove('dark-theme');
+    }
+}
+
+function testApiConnection() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const baseUrl = document.getElementById('baseUrl').value.trim();
+    
+    if (!apiKey) {
+        showToast('error', '无法测试', '请先输入 API 密钥');
+        return;
+    }
+    
+    const statusDiv = document.getElementById('connectionStatus');
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = `
+        <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info-emphasis d-flex align-items-center">
+            <i class="fas fa-circle-notch fa-spin me-3 fs-5"></i>
+            <div>正在与平台服务器建立通信测试...</div>
+        </div>
+    `;
+    
+    fetch('/api/validate_config', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            api_key: apiKey,
+            base_url: baseUrl,
+            model_name: selectedModel || 'gemini-1.5-flash'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.valid) {
+            statusDiv.innerHTML = `
+                <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success-emphasis d-flex align-items-center">
+                    <i class="fas fa-circle-check me-3 fs-5"></i>
+                    <div>${data.message}</div>
+                </div>
+            `;
+            document.getElementById('apiStatusDot').classList.remove('pending', 'error');
+            document.getElementById('apiStatusDot').classList.add('success');
+            document.getElementById('apiStatusText').textContent = '网络连通状态良好';
+        } else {
+            statusDiv.innerHTML = `
+                <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger-emphasis d-flex align-items-center">
+                    <i class="fas fa-circle-xmark me-3 fs-5"></i>
+                    <div>${data.error}</div>
+                </div>
+            `;
+            document.getElementById('apiStatusDot').classList.remove('pending', 'success');
+            document.getElementById('apiStatusDot').classList.add('error');
+            document.getElementById('apiStatusText').textContent = 'API 连接遭到拒绝';
+        }
+    })
+    .catch(error => {
+        statusDiv.innerHTML = `
+            <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger-emphasis d-flex align-items-center">
+                <i class="fas fa-wifi text-danger me-3 fs-5"></i>
+                <div>网络连接错误: ${error.message}</div>
+            </div>
+        `;
+    });
+}
+
+function saveRunParams() {
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    config.maxDebugAttempts = parseInt(document.getElementById('maxDebugAttempts').value);
+    config.timeout = parseInt(document.getElementById('timeout').value);
+    config.maxNoImprovement = parseInt(document.getElementById('maxNoImprovement').value);
+    config.enableInstrumentation = document.getElementById('enableInstrumentation').checked;
+    localStorage.setItem('tracecoder_config', JSON.stringify(config));
+    
+    showToast('success', '参数已更新', '调试运行参数保存完毕，将在下次任务生效');
+}
+
+function exportAllData() {
+    const data = {
+        config: JSON.parse(localStorage.getItem('tracecoder_config') || '{}'),
+        history: JSON.parse(localStorage.getItem('tracecoder_history') || '[]'),
+        stats: JSON.parse(localStorage.getItem('tracecoder_stats') || '{}')
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tracecoder_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('success', '备份完成', '配置文件已下载到本地');
+}
+
+function importData() {
+    document.getElementById('importFile').click();
+}
+
+function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (data.config) {
+                localStorage.setItem('tracecoder_config', JSON.stringify(data.config));
+            }
+            if (data.history) {
+                localStorage.setItem('tracecoder_history', JSON.stringify(data.history));
+            }
+            if (data.stats) {
+                localStorage.setItem('tracecoder_stats', JSON.stringify(data.stats));
+            }
+            
+            showToast('success', '导入成功', '系统数据和参数已还原，正在重载界面');
+            setTimeout(() => location.reload(), 1500);
+        } catch (err) {
+            showToast('error', '文件损坏', '解析失败，请检查文件格式是否正确');
+        }
+    };
+    reader.readAsText(file);
+}
+
+function clearAllData() {
+    if (confirm('警告: 此操作将清除所有配置、API密钥及历史调试记录，且不可撤销。确认继续吗？')) {
+        localStorage.clear();
+        showToast('success', '清理完毕', '本地存储已被彻底重置');
+        setTimeout(() => location.reload(), 1500);
+    }
+}
+</script>
+{% endblock %}

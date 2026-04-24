@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block title %}TraceCoder - 示例库{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 页面标题与搜索框区域 */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+/* 现代搜索框 */
+.search-wrapper {
+    position: relative;
+    max-width: 320px;
+    width: 100%;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search-wrapper .form-control {
+    padding-left: 40px;
+    border-radius: 30px;
+    border: 1px solid var(--border-color);
+    background-color: var(--sidebar-bg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.search-wrapper .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+/* 过滤标签 (胶囊样式) */
+.filter-container {
+    background: var(--sidebar-bg);
+    padding: 16px 20px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.category-tag {
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.category-tag i {
+    margin-right: 6px;
+}
+
+.category-tag:hover {
+    background-color: var(--border-color);
+    color: var(--text-main);
+}
+
+.category-tag.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+/* 柔和风格统计卡片 (Soft UI) */
+.stat-card {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 16px;
+}
+
+.stat-easy .stat-icon-wrapper { background: #d1fae5; color: #10b981; }
+.stat-medium .stat-icon-wrapper { background: #fef3c7; color: #f59e0b; }
+.stat-hard .stat-icon-wrapper { background: #fee2e2; color: #ef4444; }
+
+.stat-info h5 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.stat-info small {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* 示例卡片美化 */
+.example-card {
+    height: 100%;
+    background: var(--sidebar-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 顶部微秒彩色装饰条 */
+.example-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    opacity: 0.8;
+}
+.example-card[data-difficulty="easy"]::before { background-color: #10b981; }
+.example-card[data-difficulty="medium"]::before { background-color: #f59e0b; }
+.example-card[data-difficulty="hard"]::before { background-color: #ef4444; }
+
+.example-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+}
+
+/* 难度 Soft Badge */
+.diff-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.diff-badge.easy { background: #d1fae5; color: #059669; }
+.diff-badge.medium { background: #fef3c7; color: #d97706; }
+.diff-badge.hard { background: #fee2e2; color: #dc2626; }
+
+/* 模态框美化 */
+.modal-content {
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 24px;
+    background: var(--sidebar-bg);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 16px 24px;
+    background: var(--bg-color);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.code-snippet {
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: #d4d4d4;
+    overflow-x: auto;
+    border: 1px solid #333;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h2 class="page-title"><i class="fas fa-book-bookmark text-primary me-2"></i>示例库</h2>
+        <p class="text-muted mb-0 mt-1">浏览预置的编程问题示例，一键导入快速开始</p>
+    </div>
+    <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" id="searchInput" 
+            placeholder="搜索题目、描述或分类..." oninput="filterExamples()">
+    </div>
+</div>
+
+<div class="filter-container">
+    <span class="text-muted fw-medium me-2" style="font-size: 0.9rem;">
+        <i class="fas fa-filter me-1"></i>按分类筛选:
+    </span>
+    <div class="category-tag active" data-category="all" onclick="filterByCategory('all')">
+        全部示例
+    </div>
+    <div class="category-tag" data-category="array" onclick="filterByCategory('array')">
+        <i class="fas fa-layer-group"></i>数组
+    </div>
+    <div class="category-tag" data-category="string" onclick="filterByCategory('string')">
+        <i class="fas fa-font"></i>字符串
+    </div>
+    <div class="category-tag" data-category="math" onclick="filterByCategory('math')">
+        <i class="fas fa-calculator"></i>数学
+    </div>
+    <div class="category-tag" data-category="algorithm" onclick="filterByCategory('algorithm')">
+        <i class="fas fa-diagram-project"></i>算法
+    </div>
+    <div class="category-tag" data-category="data-structure" onclick="filterByCategory('data-structure')">
+        <i class="fas fa-database"></i>数据结构
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    <div class="col-md-4">
+        <div class="stat-card stat-easy">
+            <div class="stat-icon-wrapper">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="stat-info">
+                <h5 id="easyCount">0</h5>
+                <small>简单难度题目</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card stat-medium">
+            <div class="stat-icon-wrapper">
+                <i class="fas fa-fire-flame-curved"></i>
+            </div>
+            <div class="stat-info">
+                <h5 id="mediumCount">0</h5>
+                <small>中等难度题目</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card stat-hard">
+            <div class="stat-icon-wrapper">
+                <i class="fas fa-bolt-lightning"></i>
+            </div>
+            <div class="stat-info">
+                <h5 id="hardCount">0</h5>
+                <small>困难难度题目</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 示例卡片列表容器 -->
+<div class="row g-4" id="examplesList">
+</div>
+
+<!-- 模态框保留原ID -->
+<div class="modal fade" id="exampleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="exampleModalTitle">示例详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="exampleModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">取消关闭</button>
+                <button type="button" class="btn btn-primary px-4" onclick="useExample()">
+                    <i class="fas fa-wand-magic-sparkles me-2"></i>使用此示例
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let examples = [];
+let currentExample = null;
+
+// 数据结构保持完全一致，不作改动
+const allExamples = [
+    {
+        id: 'example1',
+        name: '两数之和',
+        category: 'array',
+        difficulty: 'easy',
+        description: '给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出和为目标值 target 的那两个整数，并返回它们的数组下标。',
+        test_case: 'assert two_sum([2, 7, 11, 15], 9) == [0, 1]\nassert two_sum([3, 2, 4], 6) == [1, 2]\nassert two_sum([3, 3], 6) == [0, 1]',
+        hints: ['可以使用哈希表优化查找', '注意处理重复元素的情况']
+    },
+    {
+        id: 'example2',
+        name: '回文数判断',
+        category: 'math',
+        difficulty: 'easy',
+        description: '给你一个整数 x ，如果 x 是一个回文整数，返回 true ；否则，返回 false 。回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。',
+        test_case: 'assert is_palindrome(121) == True\nassert is_palindrome(-121) == False\nassert is_palindrome(10) == False\nassert is_palindrome(0) == True',
+        hints: ['负数不是回文数', '可以转换为字符串处理']
+    },
+    {
+        id: 'example3',
+        name: '斐波那契数列',
+        category: 'algorithm',
+        difficulty: 'easy',
+        description: '计算斐波那契数列的第n项。斐波那契数列定义为：F(0) = 0, F(1) = 1, F(n) = F(n-1) + F(n-2) (n > 1)',
+        test_case: 'assert fibonacci(0) == 0\nassert fibonacci(1) == 1\nassert fibonacci(2) == 1\nassert fibonacci(3) == 2\nassert fibonacci(4) == 3\nassert fibonacci(5) == 5',
+        hints: ['注意基础情况的处理', '可以使用动态规划优化']
+    },
+    {
+        id: 'example4',
+        name: '快速排序',
+        category: 'algorithm',
+        difficulty: 'medium',
+        description: '实现快速排序算法，对整数数组进行升序排列。要求处理各种边界情况，包括空数组、单元素数组、重复元素等。',
+        test_case: 'assert quick_sort([]) == []\nassert quick_sort([1]) == [1]\nassert quick_sort([1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]\nassert quick_sort([5, 4, 3, 2, 1]) == [1, 2, 3, 4, 5]\nassert quick_sort([3, 6, 8, 10, 1, 2, 1]) == [1, 1, 2, 3, 6, 8, 10]',
+        hints: ['选择合适的基准元素', '注意递归终止条件']
+    },
+    {
+        id: 'example5',
+        name: '最长公共前缀',
+        category: 'string',
+        difficulty: 'easy',
+        description: '编写一个函数来查找字符串数组中的最长公共前缀。如果不存在公共前缀，返回空字符串 ""。',
+        test_case: 'assert longest_common_prefix(["flower","flow","flight"]) == "fl"\nassert longest_common_prefix(["dog","racecar","car"]) == ""\nassert longest_common_prefix(["a"]) == "a"',
+        hints: ['可以从第一个字符串开始比较', '注意空数组的情况']
+    },
+    {
+        id: 'example6',
+        name: '二叉树遍历',
+        category: 'data-structure',
+        difficulty: 'medium',
+        description: '实现二叉树的前序、中序、后序遍历。给定二叉树的根节点，返回对应遍历顺序的节点值列表。',
+        test_case: 'root = TreeNode(1)\nroot.right = TreeNode(2)\nroot.right.left = TreeNode(3)\nassert preorder_traversal(root) == [1, 2, 3]\nassert inorder_traversal(root) == [1, 3, 2]\nassert postorder_traversal(root) == [3, 2, 1]',
+        hints: ['可以使用递归或迭代实现', '注意处理空树的情况']
+    },
+    {
+        id: 'example7',
+        name: '合并两个有序链表',
+        category: 'data-structure',
+        difficulty: 'easy',
+        description: '将两个升序链表合并为一个新的升序链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的。',
+        test_case: 'l1 = ListNode(1, ListNode(2, ListNode(4)))\nl2 = ListNode(1, ListNode(3, ListNode(4)))\nresult = merge_two_lists(l1, l2)\nassert list_to_array(result) == [1, 1, 2, 3, 4, 4]',
+        hints: ['使用迭代或递归方法', '注意处理空链表']
+    },
+    {
+        id: 'example8',
+        name: '最长无重复子串',
+        category: 'string',
+        difficulty: 'medium',
+        description: '给定一个字符串 s ，请你找出其中不含有重复字符的最长子串的长度。',
+        test_case: 'assert length_of_longest_substring("abcabcbb") == 3\nassert length_of_longest_substring("bbbbb") == 1\nassert length_of_longest_substring("pwwkew") == 3',
+        hints: ['使用滑动窗口', '可以用哈希集合优化']
+    },
+    {
+        id: 'example9',
+        name: '三数之和',
+        category: 'array',
+        difficulty: 'hard',
+        description: '给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。返回所有满足条件且不重复的三元组。',
+        test_case: 'result = three_sum([-1,0,1,2,-1,-4])\nassert sorted([sorted(t) for t in result]) == sorted([[-1,-1,2],[-1,0,1]])\nassert three_sum([]) == []\nassert three_sum([0]) == []',
+        hints: ['先排序再双指针', '注意去重']
+    },
+    {
+        id: 'example10',
+        name: '动态规划-爬楼梯',
+        category: 'algorithm',
+        difficulty: 'easy',
+        description: '假设你正在爬楼梯。需要 n 阶你才能到达楼顶。每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶？',
+        test_case: 'assert climb_stairs(1) == 1\nassert climb_stairs(2) == 2\nassert climb_stairs(3) == 3\nassert climb_stairs(4) == 5\nassert climb_stairs(5) == 8',
+        hints: ['这是斐波那契数列的变种', '使用动态规划避免重复计算']
+    },
+    {
+        id: 'example11',
+        name: '二分查找',
+        category: 'algorithm',
+        difficulty: 'easy',
+        description: '给定一个 n 个元素有序的（升序）整型数组 nums 和一个目标值 target ，写一个函数搜索 nums 中的 target，如果目标值存在返回下标，否则返回 -1。',
+        test_case: 'assert binary_search([-1,0,3,5,9,12], 9) == 4\nassert binary_search([-1,0,3,5,9,12], 2) == -1\nassert binary_search([5], 5) == 0',
+        hints: ['注意边界条件', '使用左右指针']
+    },
+    {
+        id: 'example12',
+        name: '有效的括号',
+        category: 'string',
+        difficulty: 'easy',
+        description: '给定一个只包括 \'(\'，\')\'，\'{\'，\'}\'，\'[\'，\']\' 的字符串 s ，判断字符串是否有效。有效字符串需满足：左括号必须用相同类型的右括号闭合，左括号必须以正确的顺序闭合。',
+        test_case: 'assert is_valid_parentheses("()") == True\nassert is_valid_parentheses("()[]{}") == True\nassert is_valid_parentheses("(]") == False\nassert is_valid_parentheses("([)]") == False\nassert is_valid_parentheses("{[]}") == True',
+        hints: ['使用栈数据结构', '注意括号的配对']
+    }
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    examples = allExamples;
+    renderExamples();
+    updateCounts();
+});
+
+// 重构渲染模板，使用 Soft UI 风格的 HTML 结构
+function renderExamples(data = examples) {
+    const container = document.getElementById('examplesList');
+    
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="mb-3 text-muted opacity-50">
+                    <i class="fas fa-folder-open" style="font-size: 4rem;"></i>
+                </div>
+                <h5 class="text-muted">没有找到匹配的示例</h5>
+                <p class="text-muted small">请尝试更换搜索关键词或过滤条件</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = data.map(ex => {
+        // 根据难度映射中文和对应的颜色类名
+        const diffText = ex.difficulty === 'easy' ? '简单' : ex.difficulty === 'medium' ? '中等' : '困难';
+        
+        return `
+        <div class="col-md-6 col-lg-4">
+            <div class="card example-card pt-3" data-difficulty="${ex.difficulty}" onclick="showExample('${ex.id}')">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h6 class="card-title fw-bold mb-0 text-truncate pe-2" style="font-size: 1.1rem;">${ex.name}</h6>
+                        <span class="diff-badge ${ex.difficulty}">${diffText}</span>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem; line-height: 1.6;">
+                        ${ex.description.substring(0, 75)}${ex.description.length > 75 ? '...' : ''}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <span class="text-muted fw-medium" style="font-size: 0.85rem; background: var(--bg-color); padding: 4px 10px; border-radius: 6px;">
+                            <i class="fas fa-tag me-1 text-secondary"></i>${getCategoryName(ex.category)}
+                        </span>
+                        <small class="text-primary fw-medium d-flex align-items-center">
+                            查看详情 <i class="fas fa-arrow-right ms-1" style="font-size: 0.75rem;"></i>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `}).join('');
+}
+
+function updateCounts() {
+    const easy = examples.filter(e => e.difficulty === 'easy').length;
+    const medium = examples.filter(e => e.difficulty === 'medium').length;
+    const hard = examples.filter(e => e.difficulty === 'hard').length;
+    
+    // 实现数字滚动效果的简单动画（可选）
+    document.getElementById('easyCount').textContent = easy;
+    document.getElementById('mediumCount').textContent = medium;
+    document.getElementById('hardCount').textContent = hard;
+}
+
+function getCategoryName(category) {
+    const names = {
+        'array': '数组',
+        'string': '字符串',
+        'math': '数学',
+        'algorithm': '算法',
+        'data-structure': '数据结构'
+    };
+    return names[category] || category;
+}
+
+function filterByCategory(category) {
+    document.querySelectorAll('.category-tag').forEach(tag => {
+        tag.classList.remove('active');
+        if (tag.dataset.category === category) {
+            tag.classList.add('active');
+        }
+    });
+    
+    if (category === 'all') {
+        renderExamples(examples);
+    } else {
+        renderExamples(examples.filter(e => e.category === category));
+    }
+}
+
+function filterExamples() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    
+    if (!search) {
+        renderExamples(examples);
+        return;
+    }
+    
+    const filtered = examples.filter(e => 
+        e.name.toLowerCase().includes(search) || 
+        e.description.toLowerCase().includes(search) ||
+        getCategoryName(e.category).includes(search)
+    );
+    
+    renderExamples(filtered);
+}
+
+// 重构模态框内容渲染，使排版更清晰专业
+function showExample(id) {
+    currentExample = examples.find(e => e.id === id);
+    
+    if (!currentExample) return;
+    
+    const diffText = currentExample.difficulty === 'easy' ? '简单' : currentExample.difficulty === 'medium' ? '中等' : '困难';
+    
+    document.getElementById('exampleModalTitle').innerHTML = `
+        <span class="me-2">${currentExample.name}</span>
+        <span class="diff-badge ${currentExample.difficulty}" style="font-size: 0.8rem; vertical-align: middle;">${diffText}</span>
+    `;
+    
+    document.getElementById('exampleModalBody').innerHTML = `
+        <div class="mb-4 bg-light p-3 rounded-3 border">
+            <h6 class="fw-bold mb-2 text-dark"><i class="fas fa-align-left me-2 text-primary"></i>问题描述</h6>
+            <p class="mb-0 text-secondary" style="line-height: 1.6;">${currentExample.description}</p>
+        </div>
+        
+        <div class="mb-4">
+            <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>解题提示</h6>
+            <ul class="list-group list-group-flush border-0">
+                ${currentExample.hints.map(h => `
+                    <li class="list-group-item bg-transparent px-0 py-1 text-muted border-0 d-flex align-items-start">
+                        <i class="fas fa-check-circle text-success mt-1 me-2" style="font-size: 0.9rem;"></i> 
+                        <span>${h}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+        
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0"><i class="fas fa-vial me-2 text-info"></i>预置测试用例</h6>
+                <span class="badge bg-secondary text-light">Python</span>
+            </div>
+            <div class="code-snippet">
+                <pre class="m-0"><code class="language-python">${escapeHtml(currentExample.test_case)}</code></pre>
+            </div>
+        </div>
+    `;
+    
+    // 重新应用代码高亮
+    hljs.highlightAll();
+    
+    // 实例化并显示 Bootstrap Modal
+    new bootstrap.Modal(document.getElementById('exampleModal')).show();
+}
+
+function useExample() {
+    if (!currentExample) return;
+    
+    localStorage.setItem('tracecoder_example', JSON.stringify({
+        problem: currentExample.description,
+        tests: currentExample.test_case
+    }));
+    
+    // 跳转到生成页面
+    window.location.href = '/generate';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

@@ -23,8 +23,8 @@ def get_client():
     global client
     if client is None:
         client = OpenAI(
-            api_key="your_api_key_here",
-            base_url="your_base_url_here"
+            api_key="ywg12345678",
+            base_url="https://ai3x-opengoogle.hf.space/v1"
         )
     return client
 

@@ -29,7 +29,7 @@ def setup_arg_parser():
     Sets up and parses command-line arguments.
     """
     parser = argparse.ArgumentParser(description="A framework for running code generation and repair experiments")
-    parser.add_argument('-m', '--model', type=str, default='gemini-1.5-flash-preview-0514', help='The name of the model to use')
+    parser.add_argument('-m', '--model', type=str, default='gemini-2-flash', help='The name of the model to use')
     # Update choices to match the keys in DATASET_PATHS
     parser.add_argument('-d', '--dataset', type=str, required=True, choices=list(DATASET_PATHS.keys()), help='The dataset to use')
     parser.add_argument('--no-instrumentation', action='store_true', help='Disable the code instrumentation step')

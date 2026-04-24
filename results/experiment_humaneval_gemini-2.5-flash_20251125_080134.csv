@@ -1,0 +1,74 @@
+﻿task_id,model,dataset,method_instrumentation,method_two_step_repair,direct_gen_code,direct_gen_eval,direct_gen_passed,final_code,final_eval,final_passed,stopped_reason,total_prompt_tokens,total_completion_tokens,processing_time_seconds
+HumanEval/0,gemini-2.5-flash,humaneval,True,True,"import math
+from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    >>> has_close_elements([], 0.1)
+    False
+    >>> has_close_elements([1.0], 0.1)
+    False
+    >>> has_close_elements([1.0, 1.05, 2.0], 0.1)
+    True
+    >>> has_close_elements([1.0, 1.0, 2.0], 0.0)
+    True
+    >>> has_close_elements([1.0, 2.0, 3.0], 1.0)
+    True
+    """"""
+    n = len(numbers)
+    if n < 2:
+        return False
+
+    # Iterate through all unique pairs of numbers
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Calculate the absolute difference between the two numbers
+            difference = abs(numbers[i] - numbers[j])
+            # If the difference is less than the threshold, we found a close pair
+            if difference < threshold:
+                return True
+    
+    # If no such pair was found after checking all combinations
+    return False","{""task_id"": ""HumanEval/0"", ""passed"": true, ""result"": ""passed"", ""passed_count"": 1, ""failed_count"": 0, ""total_count"": 1}",True,"import math
+from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    >>> has_close_elements([], 0.1)
+    False
+    >>> has_close_elements([1.0], 0.1)
+    False
+    >>> has_close_elements([1.0, 1.05, 2.0], 0.1)
+    True
+    >>> has_close_elements([1.0, 1.0, 2.0], 0.0)
+    True
+    >>> has_close_elements([1.0, 2.0, 3.0], 1.0)
+    True
+    """"""
+    n = len(numbers)
+    if n < 2:
+        return False
+
+    # Iterate through all unique pairs of numbers
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Calculate the absolute difference between the two numbers
+            difference = abs(numbers[i] - numbers[j])
+            # If the difference is less than the threshold, we found a close pair
+            if difference < threshold:
+                return True
+    
+    # If no such pair was found after checking all combinations
+    return False","{""task_id"": ""HumanEval/0"", ""passed"": true, ""result"": ""passed"", ""passed_count"": 1, ""failed_count"": 0, ""total_count"": 1}",True,Passed on direct generation,144,396,8.518025159835815

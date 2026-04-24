@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TraceCoder{% endblock %}</title>
+    <!-- 引入现代字体 Inter 和 Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- 全局现代美化 CSS -->
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 布局框架 */
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-nav {
+            padding: 0 16px;
+            flex: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link i {
+            width: 24px;
+            font-size: 1.1rem;
+            margin-right: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-link.active i {
+            color: var(--primary-color);
+        }
+
+        /* 主体内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* 顶部 Header */
+        .top-header {
+            height: 72px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* 主题切换开关美化 */
+        .theme-switch {
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-switch .form-check-input {
+            width: 2.5em;
+            height: 1.25em;
+            cursor: pointer;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-color: var(--text-main);
+            border-color: var(--text-main);
+        }
+
+        /* 状态徽章美化 */
+        #apiStatus {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* 内容容器 */
+        .content-wrapper {
+            padding: 32px;
+            flex: 1;
+        }
+
+        /* 页脚 */
+        .footer {
+            background-color: transparent;
+            padding: 24px 32px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        /* 全局卡片覆盖 */
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        /* 通知弹窗美化 */
+        .toast {
+            border-radius: var(--radius-md);
+            border: none;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .top-header {
+                padding: 0 20px;
+            }
+            .content-wrapper {
+                padding: 20px;
+            }
+            /* 移动端遮罩 */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+                backdrop-filter: blur(2px);
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- 移动端遮罩层 -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-code-branch me-2"></i>
+                TraceCoder
+            </a>
+            <ul class="sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'home' %}active{% endif %}" href="{{ url_for('index') }}">
+                        <i class="fas fa-house"></i>首页
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'generate' %}active{% endif %}" href="{{ url_for('generate_page') }}">
+                        <i class="fas fa-wand-magic-sparkles"></i>代码生成
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'history' %}active{% endif %}" href="{{ url_for('history_page') }}">
+                        <i class="fas fa-clock-rotate-left"></i>历史记录
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'examples' %}active{% endif %}" href="{{ url_for('examples_page') }}">
+                        <i class="fas fa-book-bookmark"></i>示例库
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('settings_page') }}">
+                        <i class="fas fa-gear"></i>设置
+                    </a>
+                </li>
+                <li class="nav-item mt-4 pt-4 border-top">
+                    <a class="nav-link {% if active_page == 'help' %}active{% endif %}" href="{{ url_for('help_page') }}">
+                        <i class="fas fa-circle-question"></i>帮助与支持
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 右侧主体内容 -->
+        <div class="main-content">
+            <!-- 顶部工具栏 -->
+            <header class="top-header">
+                <div>
+                    <button class="mobile-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <div class="header-tools">
+                    <div class="theme-switch form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="themeToggle" title="切换暗黑模式">
+                        <label class="form-check-label ms-2 text-muted" for="themeToggle">
+                            <i class="fas fa-moon"></i>
+                        </label>
+                    </div>
+                    <span class="badge bg-secondary text-white d-flex align-items-center" id="apiStatus">
+                        <i class="fas fa-circle-dot me-2" style="font-size: 8px;"></i> 未配置
+                    </span>
+                </div>
+            </header>
+
+            <!-- 动态内容替换区 -->
+            <main class="content-wrapper">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- 页脚 -->
+            <footer class="footer mt-auto">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                        <span class="text-muted fw-medium">TraceCoder</span> 
+                        <span class="text-muted opacity-75">- 轨迹驱动的代码生成与修复框架</span>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <span class="text-muted opacity-75">© 2026 TraceCoder. All rights reserved.</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 全局通知组件保留原ID和结构 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-4" style="z-index: 1055;">
+        <div id="notificationToast" class="toast" role="alert">
+            <div class="toast-header border-0">
+                <i class="fas fa-bell me-2" id="toastIcon"></i>
+                <strong class="me-auto" id="toastTitle">通知</strong>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body pt-0" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+    
+    <!-- 添加响应式侧边栏交互 -->
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+    </script>
+    
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

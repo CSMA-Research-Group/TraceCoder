@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}500 - 服务器错误{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="error-container py-5">
+                <h1 class="display-1 text-danger mb-4">500</h1>
+                <h2 class="mb-4">服务器内部错误</h2>
+                <p class="text-muted mb-4">抱歉，服务器遇到了一个错误，无法完成您的请求。</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>返回首页
+                    </a>
+                    <button onclick="location.reload()" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-2"></i>刷新页面
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-container {
+    animation: fadeIn 0.5s ease;
+}
+
+.error-container h1 {
+    font-size: 8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@media (max-width: 768px) {
+    .error-container h1 {
+        font-size: 5rem;
+    }
+}
+</style>
+{% endblock %}

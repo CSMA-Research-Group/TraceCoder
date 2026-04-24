@@ -1,0 +1,1695 @@
+{% extends "base.html" %}
+
+{% block title %}TraceCoder - 代码生成{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 页面标题 */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+/* 现代表单控件 */
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.custom-input {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    color: var(--text-main);
+}
+
+.custom-input:focus {
+    background-color: var(--sidebar-bg);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    outline: none;
+}
+
+/* 代码编辑器风格（Mac视窗风） */
+.editor-window {
+    background: #1e1e1e;
+    border-radius: var(--radius-md);
+    border: 1px solid #333;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.editor-header {
+    background: #2d2d2d;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #404040;
+}
+
+.mac-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.mac-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.mac-dot.red { background-color: #ff5f56; }
+.mac-dot.yellow { background-color: #ffbd2e; }
+.mac-dot.green { background-color: #27c93f; }
+
+.editor-title {
+    color: #a0a0a0;
+    font-size: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.editor-actions button {
+    background: transparent;
+    border: none;
+    color: #a0a0a0;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.editor-actions button:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+}
+
+.code-textarea {
+    background: transparent;
+    border: none;
+    color: #d4d4d4;
+    font-family: 'Fira Code', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    padding: 1rem;
+    resize: vertical;
+}
+
+.code-textarea:focus {
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+/* 垂直进度条美化 */
+.progress-container {
+    padding: 1rem 0;
+}
+
+.progress-step {
+    display: flex;
+    position: relative;
+    padding-bottom: 1.5rem;
+    transition: opacity 0.3s ease;
+}
+
+.progress-step:last-child {
+    padding-bottom: 0;
+}
+
+/* 垂直连线 */
+.progress-step::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--border-color);
+    transition: background-color 0.3s ease;
+}
+
+.progress-step:last-child::before {
+    display: none;
+}
+
+.step-indicator {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    position: relative;
+    z-index: 1;
+    margin-right: 16px;
+    transition: all 0.3s ease;
+}
+
+.step-content h6 {
+    margin: 0 0 4px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+.step-content p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* 步骤状态变化 */
+.progress-step.active .step-indicator {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+.progress-step.active .step-content h6 {
+    color: var(--primary-color);
+}
+.progress-step.active::before {
+    background: linear-gradient(to bottom, var(--primary-color), var(--border-color));
+}
+
+.progress-step.completed .step-indicator {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+.progress-step.completed .step-content h6 {
+    color: var(--text-main);
+}
+.progress-step.completed::before {
+    background-color: #10b981;
+}
+
+.progress-step.error .step-indicator {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: white;
+    box-shadow: 0 0 0 4px #fee2e2;
+}
+.progress-step.error .step-content h6 {
+    color: #ef4444;
+}
+
+/* 横向步骤指示器 */
+.progress-step-horizontal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+}
+
+.progress-step-horizontal::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: -50%;
+    right: 50%;
+    height: 2px;
+    background-color: var(--border-color);
+    z-index: 0;
+}
+
+.progress-step-horizontal:first-child::before {
+    display: none;
+}
+
+.step-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+/* 横向步骤状态 */
+.progress-step-horizontal.active .step-dot {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 3px var(--primary-light);
+    transform: scale(1.1);
+}
+
+.progress-step-horizontal.completed .step-dot {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.progress-step-horizontal.completed::before {
+    background-color: #10b981;
+}
+
+.progress-step-horizontal.error .step-dot {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+/* 展开/收起按钮动画 */
+#toggleProgressIcon {
+    transition: transform 0.3s ease;
+}
+#toggleProgressIcon.expanded {
+    transform: rotate(180deg);
+}
+
+/* 竖向进度条容器 */
+.progress-detail-container {
+    transition: max-height 0.3s ease-out;
+}
+
+.progress-container-vertical {
+    position: relative;
+}
+
+/* 竖向步骤 */
+.progress-step-v {
+    display: flex;
+    position: relative;
+    padding-bottom: 1rem;
+    transition: opacity 0.3s ease;
+}
+
+.progress-step-v:last-child {
+    padding-bottom: 0;
+}
+
+/* 垂直连线 */
+.progress-step-v::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 24px;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--border-color);
+    transition: background-color 0.3s ease;
+}
+
+.progress-step-v:last-child::before {
+    display: none;
+}
+
+.step-indicator-v {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    position: relative;
+    z-index: 1;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.step-content-v h6 {
+    margin: 0 0 2px 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+.step-content-v p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* 竖向步骤状态 */
+.progress-step-v.active .step-indicator-v {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+.progress-step-v.active .step-content-v h6 {
+    color: var(--primary-color);
+}
+.progress-step-v.active::before {
+    background: linear-gradient(to bottom, var(--primary-color), var(--border-color));
+}
+
+.progress-step-v.completed .step-indicator-v {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+.progress-step-v.completed .step-content-v h6 {
+    color: var(--text-main);
+}
+.progress-step-v.completed::before {
+    background-color: #10b981;
+}
+
+.progress-step-v.error .step-indicator-v {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: white;
+    box-shadow: 0 0 0 3px #fee2e2;
+}
+.progress-step-v.error .step-content-v h6 {
+    color: #ef4444;
+}
+
+/* 核心机制卡片 (Soft UI) */
+.mechanism-card {
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    height: 100%;
+    border: 1px solid transparent;
+}
+
+.mechanism-card.hllm {
+    background: linear-gradient(145deg, #f5f3ff, #ede9fe);
+    border-color: #ddd6fe;
+}
+.mechanism-card.hllm h6 { color: #6d28d9; }
+
+.mechanism-card.rm {
+    background: linear-gradient(145deg, #fff7ed, #fef3c7);
+    border-color: #fde68a;
+}
+.mechanism-card.rm h6 { color: #d97706; }
+
+/* 示例快捷按钮 */
+.example-chip {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+    margin-right: 6px;
+}
+.example-chip:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* 主操作按钮 */
+.btn-run {
+    background: linear-gradient(135deg, var(--primary-color), #6366f1);
+    border: none;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-run:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    color: white;
+}
+
+/* 测试结果动态渲染的 CSS */
+.test-result {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+}
+.test-result.pass {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #065f46;
+}
+.test-result.fail {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+/* 代码输出高亮区覆盖 */
+.code-output pre {
+    margin: 0;
+    padding: 1rem;
+    max-height: 450px;
+    overflow: auto;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+.code-output pre code {
+    font-family: 'Fira Code', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+/* 确保布局不会被撑破 */
+.row.no-wrap {
+    flex-wrap: nowrap;
+}
+.col-lg-5, .col-lg-7 {
+    min-width: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="page-title"><i class="fas fa-wand-magic-sparkles text-primary me-2"></i>代码生成</h2>
+        <p class="text-muted mb-0 mt-1">描述您的需求，AI 智能体会自动生成并修复代码</p>
+    </div>
+</div>
+
+<div class="row g-4" style="overflow: hidden; width: 100%;">
+    <!-- 左侧面板：输入与配置 -->
+    <div class="col-lg-5" style="max-width: 50%; min-width: 0; overflow: hidden;">
+        <!-- 需求输入卡片 -->
+        <div class="card mb-4 border-0" style="overflow: hidden;">
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-end mb-2">
+                        <label class="form-label mb-0">编程问题描述 <span class="text-danger">*</span></label>
+                    </div>
+                    <textarea class="form-control custom-input code-editor" id="problemDescription" rows="5" 
+                        placeholder="例如：编写一个 Python 函数，计算列表中所有偶数的平方和..."></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-end mb-2">
+                        <label class="form-label mb-0">测试用例 <span class="text-danger">*</span></label>
+                    </div>
+                    
+                    <div class="editor-window mb-2">
+                        <div class="editor-header">
+                            <div class="mac-dots">
+                                <div class="mac-dot red"></div>
+                                <div class="mac-dot yellow"></div>
+                                <div class="mac-dot green"></div>
+                            </div>
+                            <span class="editor-title">tests.py</span>
+                            <div class="editor-actions">
+                                <button onclick="insertTestTemplate()" title="插入模板"><i class="fas fa-file-code me-1"></i>模板</button>
+                            </div>
+                        </div>
+                        <textarea class="form-control custom-input code-textarea w-100" id="testCases" rows="6" 
+                            placeholder="assert function_name(input) == expected_output"></textarea>
+                    </div>
+                    <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>每行使用一个 assert 语句</small>
+                </div>
+                
+                <div>
+                    <label class="form-label text-muted" style="font-size: 0.8rem;">快速选择示例</label>
+                    <div id="exampleButtons" class="d-flex flex-wrap">
+                        <!-- JS 动态填充 example-chip -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 运行配置显示卡片 -->
+        <div class="card border-0 bg-light" style="overflow: hidden;">
+            <div class="card-body p-3">
+                <h6 class="fw-bold mb-3"><i class="fas fa-rocket me-2 text-primary"></i>开始生成</h6>
+                
+                <!-- 显示当前配置（压缩版） -->
+                <div class="mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-white text-dark border border-secondary px-2 py-1" title="模型">
+                            <i class="fas fa-robot me-1"></i><span id="displayModel">未配置</span>
+                        </span>
+                        <span class="badge bg-white text-dark border border-secondary px-2 py-1" title="最大调试次数">
+                            <i class="fas fa-redo me-1"></i><span id="displayMaxAttempts">3</span>
+                        </span>
+                        <span class="badge bg-white text-dark border border-secondary px-2 py-1" title="执行超时">
+                            <i class="fas fa-clock me-1"></i><span id="displayTimeout">10秒</span>
+                        </span>
+                        <span class="badge bg-white text-dark border border-secondary px-2 py-1" title="回滚阈值">
+                            <i class="fas fa-undo me-1"></i><span id="displayRollback">2</span>
+                        </span>
+                        <span class="badge bg-white text-dark border border-secondary px-2 py-1" title="代码插桩" id="displayInstrumentationBadge">
+                            <i class="fas fa-bug me-1"></i>已启用
+                        </span>
+                    </div>
+                </div>
+                
+                <p class="text-muted small mb-3">
+                    <i class="fas fa-cog me-1"></i>
+                    如需修改配置请前往<a href="/settings" class="text-primary">设置页面</a>
+                </p>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-run btn-lg rounded-pill" id="runButton" onclick="startTraceCoder()">
+                        <i class="fas fa-play me-2"></i>开始生成
+                    </button>
+                    <div class="d-flex gap-2" id="controlButtons" style="display: none;">
+                        <button class="btn btn-warning btn-lg rounded-pill shadow-sm flex-grow-1" id="pauseButton" onclick="togglePause()">
+                            <i class="fas fa-pause me-2" id="pauseIcon"></i><span id="pauseText">暂停</span>
+                        </button>
+                        <button class="btn btn-danger btn-lg rounded-pill shadow-sm flex-grow-1" id="stopButton" onclick="stopTraceCoder()">
+                            <i class="fas fa-stop me-2"></i>终止
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧面板：进度与输出 -->
+    <div class="col-lg-7 d-flex flex-column" style="height: calc(100vh - 120px); max-width: 50%; min-width: 0;">
+        <!-- 紧凑进度条（可展开） -->
+        <div class="card border-0 mb-3" id="progressCard">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0" style="font-size: 0.85rem;"><i class="fas fa-tasks me-2 text-primary"></i>执行进度</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-light text-primary border border-primary px-2 py-1 rounded-pill" style="font-size: 0.75rem;" id="currentStep">等待开始</span>
+                        <button class="btn btn-link btn-sm p-0 text-muted" id="toggleProgressBtn" onclick="toggleProgressDetail()" title="展开详情">
+                            <i class="fas fa-chevron-down" id="toggleProgressIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="progress bg-light" style="height: 4px; border-radius: 2px;">
+                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" id="progressBar" 
+                        role="progressbar" style="width: 0%; border-radius: 2px;"></div>
+                </div>
+                <!-- 横向步骤指示器 -->
+                <div class="d-flex justify-content-between mt-2" id="progressSteps">
+                    <div class="progress-step-horizontal" data-step="1" title="问题理解">
+                        <div class="step-dot">1</div>
+                    </div>
+                    <div class="progress-step-horizontal" data-step="2" title="初始生成">
+                        <div class="step-dot">2</div>
+                    </div>
+                    <div class="progress-step-horizontal" data-step="3" title="代码测试">
+                        <div class="step-dot">3</div>
+                    </div>
+                    <div class="progress-step-horizontal" data-step="4" title="结果分析">
+                        <div class="step-dot">4</div>
+                    </div>
+                    <div class="progress-step-horizontal" data-step="5" title="调试迭代">
+                        <div class="step-dot">5</div>
+                    </div>
+                    <div class="progress-step-horizontal" data-step="6" title="任务完成">
+                        <div class="step-dot"><i class="fas fa-check" style="font-size: 0.5rem;"></i></div>
+                    </div>
+                </div>
+                
+                <!-- 展开的详细进度（竖向） -->
+                <div id="progressDetail" class="progress-detail-container" style="display: none; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                    <div class="progress-detail-content mt-3 pt-3 border-top">
+                        <div class="progress-container-vertical" id="progressStepsVertical">
+                            <div class="progress-step-v" data-step="1">
+                                <div class="step-indicator-v">1</div>
+                                <div class="step-content-v">
+                                    <h6>问题理解</h6>
+                                    <p>接收描述，解析意图</p>
+                                </div>
+                            </div>
+                            <div class="progress-step-v" data-step="2">
+                                <div class="step-indicator-v">2</div>
+                                <div class="step-content-v">
+                                    <h6>初始生成</h6>
+                                    <p>调用 LLM 生成解决方案</p>
+                                </div>
+                            </div>
+                            <div class="progress-step-v" data-step="3">
+                                <div class="step-indicator-v">3</div>
+                                <div class="step-content-v">
+                                    <h6>代码测试</h6>
+                                    <p>在沙箱中运行测试用例</p>
+                                </div>
+                            </div>
+                            <div class="progress-step-v" data-step="4">
+                                <div class="step-indicator-v">4</div>
+                                <div class="step-content-v">
+                                    <h6>结果分析</h6>
+                                    <p>提取追踪轨迹与报错信息</p>
+                                </div>
+                            </div>
+                            <div class="progress-step-v" data-step="5">
+                                <div class="step-indicator-v">5</div>
+                                <div class="step-content-v">
+                                    <h6>调试迭代</h6>
+                                    <p>多智能体插桩与自我修复</p>
+                                </div>
+                            </div>
+                            <div class="progress-step-v" data-step="6">
+                                <div class="step-indicator-v"><i class="fas fa-check"></i></div>
+                                <div class="step-content-v">
+                                    <h6>任务完成</h6>
+                                    <p>输出最终正确代码</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心机制状态 (紧凑显示) -->
+        <div class="card border-0 mb-3" id="mechanismsCard" style="display: none;">
+            <div class="card-body p-2">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="mechanism-card hllm p-2">
+                            <h6 class="fw-bold mb-1" style="font-size: 0.75rem;"><i class="fas fa-brain me-1"></i>HLLM</h6>
+                            <div id="hllmContent" style="font-size: 0.7rem;">
+                                <p class="text-muted mb-0">等待启动...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mechanism-card rm p-2">
+                            <h6 class="fw-bold mb-1" style="font-size: 0.75rem;"><i class="fas fa-clock-rotate-left me-1"></i>RM</h6>
+                            <div id="rmContent" style="font-size: 0.7rem;">
+                                <p class="text-muted mb-0">等待启动...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 终端代码输出 (占据主要空间) -->
+        <div class="card border-0 shadow-sm flex-grow-1" style="min-height: 0; overflow: hidden;">
+            <div class="editor-window code-output h-100">
+                <div class="editor-header">
+                    <div class="mac-dots">
+                        <div class="mac-dot red"></div>
+                        <div class="mac-dot yellow"></div>
+                        <div class="mac-dot green"></div>
+                    </div>
+                    <span class="editor-title"><i class="fab fa-python me-1"></i> solution.py</span>
+                    <div class="editor-actions d-flex align-items-center">
+                        <span class="text-muted me-3" id="codeLines" style="font-size: 0.75rem;">0 行</span>
+                        <button onclick="copyCode()" title="复制代码"><i class="fas fa-copy"></i></button>
+                        <button onclick="downloadCode()" title="下载文件"><i class="fas fa-download"></i></button>
+                    </div>
+                </div>
+                <pre class="h-100" style="margin: 0; overflow: auto; white-space: pre-wrap; word-break: break-all;"><code id="codeOutput" class="language-python"># AI 生成的代码将在这里实时显示...</code></pre>
+            </div>
+        </div>
+
+        <!-- 测试结果面板 -->
+        <div class="card border-0 mt-3" id="testResultsCard" style="display: none; max-height: 200px; overflow-y: auto;">
+            <div class="card-body p-3">
+                <h6 class="fw-bold mb-2" style="font-size: 0.85rem;"><i class="fas fa-vial-circle-check me-2 text-success"></i>测试执行报告</h6>
+                <div id="testResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 完成状态模态框保留原ID -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--radius-lg);">
+            <div class="modal-header border-0 bg-transparent pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center px-5 pt-0 pb-4" id="resultModalBody">
+                <!-- JS 会动态注入这部分内容，为了保持完全兼容，不在此处改写 JS，而是通过 CSS 让注入的内容看起来更好 -->
+            </div>
+            <div class="modal-footer border-0 bg-light rounded-bottom justify-content-center py-3">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">关闭</button>
+                <a href="/history" class="btn btn-primary px-4">
+                    <i class="fas fa-history me-1"></i>查看历史记录
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 这里完全保留原版 JavaScript 代码，不作任何逻辑修改
+let currentStreamReader = null;
+let isRunning = false;
+let currentCode = '';
+let taskId = null;
+let startTime = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadExamples();
+    checkApiConfig();
+    loadExampleFromStorage(); // 加载从示例页面跳转过来的数据
+    displayRunConfig(); // 显示运行配置
+});
+
+function loadExamples() {
+    fetch('/api/examples')
+        .then(response => response.json())
+        .then(examples => {
+            const container = document.getElementById('exampleButtons');
+            // 修改了渲染的 HTML class 适应新的外观
+            container.innerHTML = examples.map(ex => `
+                <div class="example-chip" onclick="loadExample('${ex.id}')">
+                    ${ex.name}
+                </div>
+            `).join('');
+        });
+}
+
+function loadExample(id) {
+    fetch(`/api/examples/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('problemDescription').value = data.description;
+            document.getElementById('testCases').value = data.test_case;
+            showToast('success', '示例已加载', `已加载示例: ${data.name}`);
+        });
+}
+
+function loadExampleFromStorage() {
+    // 检查是否有从示例页面跳转过来的数据
+    const exampleData = localStorage.getItem('tracecoder_example');
+    if (exampleData) {
+        try {
+            const data = JSON.parse(exampleData);
+            if (data.problem) {
+                document.getElementById('problemDescription').value = data.problem;
+            }
+            if (data.tests) {
+                document.getElementById('testCases').value = data.tests;
+            }
+            // 加载完成后清除存储，避免刷新页面时重复加载
+            localStorage.removeItem('tracecoder_example');
+            showToast('success', '示例已加载', '已从示例库加载问题和测试用例');
+        } catch (e) {
+            console.error('Failed to load example from storage:', e);
+        }
+    }
+}
+
+function insertTestTemplate() {
+    const template = `# 测试用例模板\n# assert function_name(arg1, arg2) == expected_result\n\n# 示例:\n# assert add(2, 3) == 5\n# assert add(-1, 1) == 0\n# assert add(0, 0) == 0`;
+    document.getElementById('testCases').value = template;
+}
+
+function checkApiConfig() {
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    if (!config.apiKey) {
+        showToast('warning', 'API未配置', '请先在设置页面配置API密钥');
+    }
+}
+
+function displayRunConfig() {
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    
+    // 显示模型
+    const modelName = config.modelName || config.model || '未配置';
+    document.getElementById('displayModel').textContent = modelName;
+    
+    // 显示最大调试次数
+    document.getElementById('displayMaxAttempts').textContent = config.maxDebugAttempts || 3;
+    
+    // 显示超时
+    document.getElementById('displayTimeout').textContent = (config.timeout || 10) + '秒';
+    
+    // 显示回滚阈值
+    document.getElementById('displayRollback').textContent = config.maxNoImprovement || 2;
+    
+    // 显示代码插桩状态
+    const instrumentationEnabled = config.enableInstrumentation !== false;
+    const instrumentationBadge = document.getElementById('displayInstrumentationBadge');
+    if (instrumentationEnabled) {
+        instrumentationBadge.className = 'badge bg-success text-white px-2 py-1';
+        instrumentationBadge.innerHTML = '<i class="fas fa-bug me-1"></i>已启用';
+    } else {
+        instrumentationBadge.className = 'badge bg-secondary text-white px-2 py-1';
+        instrumentationBadge.innerHTML = '<i class="fas fa-bug me-1"></i>已禁用';
+    }
+}
+
+function startTraceCoder() {
+    const problem = document.getElementById('problemDescription').value.trim();
+    const tests = document.getElementById('testCases').value.trim();
+    
+    if (!problem) {
+        showToast('error', '错误', '请输入问题描述');
+        document.getElementById('problemDescription').focus();
+        return;
+    }
+    
+    if (problem.length < 10) {
+        showToast('warning', '提示', '问题描述太短，建议提供更详细的描述以获得更好的结果');
+    }
+    
+    if (!tests) {
+        showToast('error', '错误', '请输入测试用例');
+        document.getElementById('testCases').focus();
+        return;
+    }
+    
+    const config = JSON.parse(localStorage.getItem('tracecoder_config') || '{}');
+    if (!config.apiKey) {
+        showToast('warning', 'API未配置', '请先在设置页面配置API密钥');
+        setTimeout(() => {
+            window.location.href = '/settings';
+        }, 1500);
+        return;
+    }
+    
+    isRunning = true;
+    isPaused = false;
+    startTime = Date.now();
+    taskId = 'task_' + Date.now();
+    
+    document.getElementById('runButton').style.display = 'none';
+    document.getElementById('controlButtons').style.display = 'flex';
+    document.getElementById('mechanismsCard').style.display = 'block';
+    document.getElementById('testResultsCard').style.display = 'none';
+    
+    resetProgress();
+    updateProgressStep(1, 'active', '正在连接服务器...');
+    
+    const eventData = {
+        problem_description: problem,
+        test_cases: tests,
+        model_name: config.model || 'gemini-1.5-flash',
+        api_key: config.apiKey,
+        base_url: config.baseUrl,
+        max_debug_attempts: config.maxDebugAttempts || 3,
+        timeout: config.timeout || 10,
+        max_no_improvement: config.maxNoImprovement || 2,
+        enable_instrumentation: config.enableInstrumentation !== false
+    };
+    
+    fetch('/api/run_tracecoder_stream', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(eventData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.error || `服务器错误 (${response.status})`);
+            }).catch(() => {
+                throw new Error(`服务器错误 (${response.status})`);
+            });
+        }
+        const reader = response.body.getReader();
+        currentStreamReader = reader;
+        const decoder = new TextDecoder();
+        let buffer = '';
+        
+        function readStream() {
+            if (isPaused) {
+                setTimeout(readStream, 100);
+                return;
+            }
+            
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    finishExecution();
+                    return;
+                }
+                
+                if (!isRunning) {
+                    reader.cancel();
+                    return;
+                }
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n\n');
+                buffer = lines.pop();
+                
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const step = JSON.parse(line.substring(6));
+                            if (step.error) {
+                                throw new Error(step.error);
+                            }
+                            handleStep(step);
+                        } catch (e) {
+                            console.error('Error:', e);
+                            handleApiError(e.message);
+                            finishExecution();
+                        }
+                    }
+                });
+                
+                readStream();
+            }).catch(error => {
+                if (error.name !== 'AbortError') {
+                    handleApiError(error.message);
+                    finishExecution();
+                }
+            });
+        }
+        
+        readStream();
+    })
+    .catch(error => {
+        handleApiError(error.message);
+        finishExecution();
+    });
+}
+
+function handleApiError(message) {
+    let title = '错误';
+    let detail = message;
+    
+    if (message.includes('API key') || message.includes('authentication') || message.includes('401')) {
+        title = 'API认证失败';
+        detail = 'API密钥无效或已过期，请检查设置页面中的API配置';
+    } else if (message.includes('rate limit') || message.includes('429')) {
+        title = '请求过于频繁';
+        detail = 'API调用频率超限，请稍后再试';
+    } else if (message.includes('timeout') || message.includes('ETIMEDOUT')) {
+        title = '连接超时';
+        detail = '服务器响应超时，请检查网络连接';
+    } else if (message.includes('network') || message.includes('ECONNREFUSED')) {
+        title = '网络错误';
+        detail = '无法连接到服务器，请检查网络设置';
+    } else if (message.includes('model') || message.includes('not found')) {
+        title = '模型错误';
+        detail = '所选模型不可用，请尝试更换模型';
+    }
+    
+    showToast('error', title, detail);
+    
+    document.querySelectorAll('.progress-step').forEach((step, index) => {
+        if (step.classList.contains('active')) {
+            step.classList.remove('active');
+            step.classList.add('error');
+        }
+    });
+}
+
+function stopTraceCoder() {
+    isRunning = false;
+    
+    fetch('/api/stop_tracecoder', { method: 'POST' })
+        .then(() => {
+            showToast('info', '已停止', 'TraceCoder流程已停止');
+            finishExecution();
+        });
+}
+
+function handleStep(step) {
+    updateProgressStep(step.step, step.status, step.title);
+
+    if (step.content && step.step === 2) {
+        currentCode = step.content;
+    }
+
+    if (step.step === 5 && step.debug_info) {
+        updateMechanisms(step.debug_info);
+    }
+
+    if (step.test_results) {
+        showTestResults(step.test_results);
+    }
+    
+    if (step.title && step.title.includes('HLLM机制更新')) {
+        updateHLLMDisplay(step.content);
+    }
+    
+    if (step.title && step.title.includes('RM机制更新')) {
+        updateRMDisplay(step.content);
+    }
+
+    updateStepInfo(step);
+    
+    appendStepToOutput(step);
+}
+
+function appendStepToOutput(step) {
+    let stepText = '';
+    
+    const statusIcon = step.status === 'completed' ? '✓' : 
+                       step.status === 'error' ? '✗' : '→';
+    const statusText = step.status === 'completed' ? '[完成]' : 
+                       step.status === 'error' ? '[错误]' : '[进行中]';
+    
+    stepText += `\n${'='.repeat(60)}\n`;
+    stepText += `# 步骤 ${step.step}: ${step.title || ''} ${statusText}\n`;
+    stepText += `${'='.repeat(60)}\n`;
+    
+    if (step.description) {
+        stepText += `# 描述: ${step.description}\n`;
+    }
+    
+    if (step.content) {
+        if (step.step === 2) {
+            stepText += `\n# 生成的代码:\n`;
+            stepText += `${'─'.repeat(40)}\n`;
+            stepText += step.content;
+            if (!step.content.endsWith('\n')) {
+                stepText += '\n';
+            }
+            stepText += `${'─'.repeat(40)}\n`;
+        } else {
+            const contentPreview = step.content.length > 500 ? 
+                                   step.content.substring(0, 500) + '...\n[内容过长，已截断]' : 
+                                   step.content;
+            stepText += `\n# 输出内容:\n`;
+            stepText += `${'─'.repeat(40)}\n`;
+            stepText += contentPreview;
+            if (!contentPreview.endsWith('\n')) {
+                stepText += '\n';
+            }
+            stepText += `${'─'.repeat(40)}\n`;
+        }
+    }
+    
+    if (step.test_results && step.test_results.length > 0) {
+        stepText += `\n# 测试结果:\n`;
+        stepText += `${'─'.repeat(40)}\n`;
+        step.test_results.forEach((result, i) => {
+            const resultIcon = result.passed ? '✓' : '✗';
+            const resultStatus = result.passed ? '通过' : '失败';
+            stepText += `  ${resultIcon} 测试用例 #${i + 1}: ${resultStatus}\n`;
+            stepText += `    输入: ${result.input}\n`;
+            stepText += `    期望: ${result.expected}\n`;
+            if (!result.passed) {
+                stepText += `    实际: ${result.actual}\n`;
+            }
+        });
+        stepText += `${'─'.repeat(40)}\n`;
+    }
+    
+    if (step.passed_count !== undefined || step.failed_count !== undefined) {
+        stepText += `\n# 统计: 通过 ${step.passed_count || 0} / 失败 ${step.failed_count || 0}\n`;
+    }
+    
+    if (step.debug_info) {
+        stepText += `\n# 调试信息:\n`;
+        if (step.debug_info.hllm) {
+            stepText += `  HLLM - 记录数: ${step.debug_info.hllm.count || 0}\n`;
+            if (step.debug_info.hllm.latest) {
+                stepText += `  HLLM - 最新: ${step.debug_info.hllm.latest}\n`;
+            }
+        }
+        if (step.debug_info.rm) {
+            stepText += `  RM - 最佳分数: ${step.debug_info.rm.best_score || 0}\n`;
+            stepText += `  RM - 无改善次数: ${step.debug_info.rm.streak || 0}\n`;
+        }
+    }
+    
+    accumulatedOutput += stepText;
+    
+    const codeElement = document.getElementById('codeOutput');
+    codeElement.textContent = accumulatedOutput;
+    hljs.highlightElement(codeElement);
+    
+    const lines = accumulatedOutput.split('\n').length;
+    document.getElementById('codeLines').textContent = lines + ' 行';
+    
+    codeElement.scrollTop = codeElement.scrollHeight;
+}
+
+function updateHLLMDisplay(content) {
+    const card = document.getElementById('mechanismsCard');
+    if (card) {
+        card.style.display = 'block';
+    }
+    
+    const hllmContent = document.getElementById('hllmContent');
+    if (!hllmContent) return;
+    
+    const lines = content.split('\n');
+    let inHistory = false;
+    let historyRecords = [];
+    
+    lines.forEach(line => {
+        if (line.includes('历史记录：')) {
+            inHistory = true;
+        } else if (inHistory && line.trim()) {
+            historyRecords.push(line.trim());
+        }
+    });
+    
+    let html = '<div class="text-dark fw-medium" style="font-size: 0.75rem;">';
+    
+    if (historyRecords.length > 0) {
+        html += '<p class="mb-1 text-primary fw-bold">历史记录 (' + historyRecords.length + '条):</p>';
+        html += '<div class="bg-light p-1 rounded" style="max-height: 80px; overflow-y: auto;">';
+        historyRecords.forEach(record => {
+            const isSuccess = record.includes('成功');
+            const colorClass = isSuccess ? 'text-success' : 'text-danger';
+            html += '<p class="mb-0 ' + colorClass + '" style="font-size: 0.65rem;">' + escapeHtml(record) + '</p>';
+        });
+        html += '</div>';
+    } else {
+        html += '<p class="text-muted mb-0">' + escapeHtml(content.substring(0, 100)) + '</p>';
+    }
+    
+    html += '</div>';
+    hllmContent.innerHTML = html;
+}
+
+function updateRMDisplay(content) {
+    const card = document.getElementById('mechanismsCard');
+    if (card) {
+        card.style.display = 'block';
+    }
+    
+    const rmContent = document.getElementById('rmContent');
+    if (!rmContent) return;
+    
+    let html = '<div style="font-size: 0.75rem;">';
+    
+    const passedMatch = content.match(/通过(\d+)\/(\d+)测试用例/);
+    const streakMatch = content.match(/无改善计数器[：:]\s*(\d+)/);
+    
+    if (passedMatch) {
+        const passed = passedMatch[1];
+        const total = passedMatch[2];
+        html += '<div class="d-flex justify-content-between mb-1">' +
+            '<span class="text-dark fw-medium">最佳: <span class="text-success">' + passed + '/' + total + '</span></span>' +
+        '</div>';
+    }
+    
+    if (streakMatch) {
+        html += '<div class="mb-1">' +
+            '<span class="text-muted">无改善: <span class="text-warning">' + streakMatch[1] + '</span>次</span>' +
+        '</div>';
+    }
+    
+    const codeMatch = content.match(/当前最佳代码[:：]\s*([\s\S]*)/);
+    if (codeMatch && codeMatch[1]) {
+        const codePreview = codeMatch[1].trim().substring(0, 150);
+        html += '<div class="bg-light p-1 rounded" style="max-height: 60px; overflow-y: auto;">' +
+            '<code style="font-size: 0.65rem; color: #666;">' + escapeHtml(codePreview) + '...</code>' +
+        '</div>';
+    } else {
+        html += '<p class="text-muted mb-0">' + escapeHtml(content.substring(0, 80)) + '...</p>';
+    }
+    
+    html += '</div>';
+    rmContent.innerHTML = html;
+}
+
+function updateStepInfo(step) {
+    let infoCard = document.getElementById('stepInfoCard');
+    let infoContent = document.getElementById('stepInfoContent');
+    
+    // 如果元素不存在，动态创建
+    if (!infoCard) {
+        infoCard = document.createElement('div');
+        infoCard.id = 'stepInfoCard';
+        infoCard.className = 'card border-0 mt-3';
+        infoCard.style.display = 'none';
+        
+        const testResultsCard = document.getElementById('testResultsCard');
+        if (testResultsCard) {
+            testResultsCard.parentNode.insertBefore(infoCard, testResultsCard.nextSibling);
+        }
+        
+        infoCard.innerHTML = '<div class="card-body p-3">' +
+            '<h6 class="fw-bold mb-2" style="font-size: 0.85rem;"><i class="fas fa-info-circle me-2 text-primary"></i>当前步骤详情</h6>' +
+            '<div id="stepInfoContent" class="small"></div>' +
+        '</div>';
+        infoContent = document.getElementById('stepInfoContent');
+    }
+    
+    if (!step || !step.title) {
+        infoCard.style.display = 'none';
+        return;
+    }
+    
+    infoCard.style.display = 'block';
+    
+    let html = '<div class="mb-2"><strong>步骤 ' + step.step + ':</strong> ' + step.title + '</div>';
+    
+    if (step.description) {
+        html += '<div class="mb-2 text-muted">' + step.description + '</div>';
+    }
+    
+    if (step.status) {
+        const statusClass = step.status === 'completed' ? 'text-success' : 
+                           step.status === 'error' ? 'text-danger' : 'text-warning';
+        const statusText = step.status === 'completed' ? '已完成' : 
+                          step.status === 'error' ? '错误' : '进行中';
+        html += '<div class="mb-2"><strong>状态:</strong> <span class="' + statusClass + '">' + statusText + '</span></div>';
+    }
+    
+    if (step.content) {
+        const contentPreview = step.content.length > 500 ? 
+                             step.content.substring(0, 500) + '...' : step.content;
+        html += '<div class="mb-2"><strong>内容:</strong>' +
+            '<pre class="mt-1 p-2 bg-light rounded small" style="max-height: 200px; overflow: auto; white-space: pre-wrap;">' + escapeHtml(contentPreview) + '</pre>' +
+        '</div>';
+    }
+    
+    if (step.passed_count !== undefined || step.failed_count !== undefined) {
+        html += '<div class="mb-2"><strong>测试结果:</strong> ' + 
+            '<span class="text-success">通过: ' + (step.passed_count || 0) + '</span> / ' + 
+            '<span class="text-danger">失败: ' + (step.failed_count || 0) + '</span>' +
+        '</div>';
+    }
+    
+    if (infoContent) {
+        infoContent.innerHTML = html;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function toggleProgressDetail() {
+    const detailContainer = document.getElementById('progressDetail');
+    const toggleIcon = document.getElementById('toggleProgressIcon');
+    const toggleBtn = document.getElementById('toggleProgressBtn');
+
+    if (detailContainer.style.display === 'none') {
+        // 展开
+        detailContainer.style.display = 'block';
+        // 使用 setTimeout 确保 transition 生效
+        setTimeout(() => {
+            detailContainer.style.maxHeight = '400px';
+        }, 10);
+        toggleIcon.classList.add('expanded');
+        toggleBtn.title = '收起详情';
+    } else {
+        // 收起
+        detailContainer.style.maxHeight = '0';
+        toggleIcon.classList.remove('expanded');
+        toggleBtn.title = '展开详情';
+        // 动画结束后隐藏
+        setTimeout(() => {
+            detailContainer.style.display = 'none';
+        }, 300);
+    }
+}
+
+function updateProgressStep(stepNum, status, title) {
+    // 更新横向步骤指示器
+    const steps = document.querySelectorAll('.progress-step-horizontal');
+    steps.forEach((step, index) => {
+        const num = index + 1;
+        step.classList.remove('active', 'completed', 'error');
+
+        if (num < stepNum) {
+            step.classList.add('completed');
+        } else if (num === stepNum) {
+            if (status === 'completed') {
+                step.classList.add('completed');
+            } else if (status === 'error') {
+                step.classList.add('error');
+            } else {
+                step.classList.add('active');
+            }
+        }
+    });
+
+    // 同步更新竖向步骤指示器
+    const verticalSteps = document.querySelectorAll('.progress-step-v');
+    verticalSteps.forEach((step, index) => {
+        const num = index + 1;
+        step.classList.remove('active', 'completed', 'error');
+
+        if (num < stepNum) {
+            step.classList.add('completed');
+        } else if (num === stepNum) {
+            if (status === 'completed') {
+                step.classList.add('completed');
+            } else if (status === 'error') {
+                step.classList.add('error');
+            } else {
+                step.classList.add('active');
+            }
+        }
+    });
+
+    // 智能进度条计算
+    let progress;
+    
+    // 总步骤计算：5个基础步骤 + 3轮调试 * 13步/轮 = 44步
+    const totalSteps = 5 + 3 * 13;
+    
+    // 直接按步骤比例计算
+    progress = Math.min(100, (stepNum / totalSteps) * 100);
+    
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('currentStep').textContent = title || '处理中...';
+}
+
+let codeTypingInterval = null;
+let displayedCode = '';
+let isPaused = false;
+let accumulatedOutput = '';
+let eventSource = null;
+
+function updateCodeOutput(code, isStreaming = false) {
+    const codeElement = document.getElementById('codeOutput');
+    
+    // 如果是流式输出且代码是增量更新的
+    if (isStreaming && code.startsWith(displayedCode)) {
+        const newContent = code.slice(displayedCode.length);
+        streamCodeOutput(codeElement, newContent, code);
+    } else {
+        // 非流式或代码有变化，直接显示
+        displayedCode = code;
+        codeElement.textContent = code;
+        hljs.highlightElement(codeElement);
+    }
+    
+    const lines = code.split('\n').length;
+    document.getElementById('codeLines').textContent = lines + ' 行';
+}
+
+function streamCodeOutput(codeElement, newContent, fullCode) {
+    // 清除之前的定时器
+    if (codeTypingInterval) {
+        clearInterval(codeTypingInterval);
+    }
+    
+    let index = 0;
+    const chars = newContent.split('');
+    
+    codeTypingInterval = setInterval(() => {
+        if (index < chars.length) {
+            displayedCode += chars[index];
+            codeElement.textContent = displayedCode;
+            index++;
+            
+            // 每10个字符高亮一次，避免频繁调用
+            if (index % 10 === 0 || index === chars.length) {
+                hljs.highlightElement(codeElement);
+            }
+        } else {
+            clearInterval(codeTypingInterval);
+            codeTypingInterval = null;
+            // 确保最终代码完整显示
+            displayedCode = fullCode;
+            codeElement.textContent = displayedCode;
+            hljs.highlightElement(codeElement);
+        }
+    }, 5); // 每5毫秒显示一个字符
+}
+
+function updateMechanisms(info) {
+    if (info.hllm) {
+        document.getElementById('hllmContent').innerHTML = `
+            <p class="mb-1 text-dark fw-medium" style="font-size: 0.9rem;">累计记录数: <span class="badge bg-primary rounded-pill">${info.hllm.count || 0}</span></p>
+            <p class="mb-0 text-muted" style="font-size: 0.8rem; line-height:1.4;">${info.hllm.latest || '暂无记录'}</p>
+        `;
+    }
+    
+    if (info.rm) {
+        document.getElementById('rmContent').innerHTML = `
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-dark fw-medium" style="font-size: 0.9rem;">最佳分数: ${info.rm.best_score || 0}</span>
+                <span class="text-dark fw-medium" style="font-size: 0.9rem;">无改善: ${info.rm.streak || 0}次</span>
+            </div>
+            <p class="mb-0 text-muted" style="font-size: 0.8rem;">状态: ${info.rm.status || '正常监控中'}</p>
+        `;
+    }
+}
+
+function showTestResults(results) {
+    const container = document.getElementById('testResults');
+    document.getElementById('testResultsCard').style.display = 'block';
+    
+    let html = '';
+    results.forEach((result, i) => {
+        const statusClass = result.passed ? 'pass' : 'fail';
+        const icon = result.passed ? 'check-circle' : 'circle-exclamation';
+        html += `
+            <div class="test-result ${statusClass}">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-${icon} mt-1 me-2" style="font-size:1.1rem;"></i>
+                    <div class="w-100">
+                        <div class="d-flex justify-content-between">
+                            <strong class="mb-1">Test Case #${i + 1}</strong>
+                        </div>
+                        <div class="text-opacity-75">输入: <code>${result.input}</code></div>
+                        <div class="text-opacity-75">期望: <code>${result.expected}</code></div>
+                        ${!result.passed ? `<div class="mt-1 pt-1 border-top" style="border-color: rgba(220,38,38,0.2) !important;"><span class="fw-bold">实际输出:</span> <code>${result.actual}</code></div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function showCompletionModal(step) {
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+    const success = step.status === 'completed';
+    
+    // 微调了 JS 注入的 HTML 以配合新设计
+    document.getElementById('resultModalBody').innerHTML = `
+        <div class="mb-4 mt-3">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 ${success ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}" style="width: 80px; height: 80px;">
+                <i class="fas fa-${success ? 'check' : 'xmark'} fa-3x"></i>
+            </div>
+            <h4 class="fw-bold text-dark">${success ? '生成成功' : '生成失败'}</h4>
+            <p class="text-muted mb-0">总耗时: <span class="fw-medium text-dark">${duration}秒</span></p>
+        </div>
+        <div class="row g-3 px-3">
+            <div class="col-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <h2 class="text-success fw-bold mb-0">${step.passed_count || 0}</h2>
+                    <small class="text-muted fw-medium">通过用例</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <h2 class="text-danger fw-bold mb-0">${step.failed_count || 0}</h2>
+                    <small class="text-muted fw-medium">失败用例</small>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 注释掉自动弹窗，改为手动触发或延迟显示
+    // new bootstrap.Modal(document.getElementById('resultModal')).show();
+    
+    // 改为在页面顶部显示成功提示，不弹窗
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${success ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <strong>${success ? '生成成功！' : '生成失败'}</strong> 总耗时: ${duration}秒
+        <br>通过: ${step.passed_count || 0} | 失败: ${step.failed_count || 0}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // 5秒后自动关闭提示
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function finishExecution() {
+    isRunning = false;
+    isPaused = false;
+    document.getElementById('runButton').style.display = 'block';
+    document.getElementById('controlButtons').style.display = 'none';
+    document.getElementById('pauseIcon').className = 'fas fa-pause me-2';
+    document.getElementById('pauseText').textContent = '暂停';
+    document.getElementById('currentStep').textContent = '执行结束';
+    
+    // 流程结束后显示弹窗并自动保存历史记录
+    setTimeout(() => {
+        // 构建一个模拟的 step 对象用于显示结果
+        const finalStep = {
+            status: 'completed',
+            passed_count: document.querySelectorAll('.test-result.success').length,
+            failed_count: document.querySelectorAll('.test-result.error').length
+        };
+        
+        // 显示完成弹窗
+        showCompletionModal(finalStep);
+        
+        // 自动保存到历史记录
+        autoSaveToHistory(finalStep);
+    }, 500); // 延迟500ms确保UI更新完成
+}
+
+// 自动保存到历史记录（无需用户点击）
+function autoSaveToHistory(step) {
+    const problem = document.getElementById('problemDescription').value;
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+    const success = step.failed_count === 0;
+    
+    const history = JSON.parse(localStorage.getItem('tracecoder_history') || '[]');
+    history.unshift({
+        id: taskId,
+        problem: problem,
+        code: currentCode,
+        success: success,
+        duration: duration,
+        timestamp: new Date().toISOString()
+    });
+    
+    localStorage.setItem('tracecoder_history', JSON.stringify(history.slice(0, 50)));
+    
+    // 更新统计
+    const stats = JSON.parse(localStorage.getItem('tracecoder_stats') || '{"total":0,"success":0,"avgTime":0}');
+    stats.total++;
+    if (success) stats.success++;
+    stats.avgTime = (stats.avgTime * (stats.total - 1) + parseFloat(duration)) / stats.total;
+    localStorage.setItem('tracecoder_stats', JSON.stringify(stats));
+    
+    // 显示自动保存提示
+    showToast('success', '已自动保存', '任务已自动保存到历史记录');
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    const pauseIcon = document.getElementById('pauseIcon');
+    const pauseText = document.getElementById('pauseText');
+    const pauseButton = document.getElementById('pauseButton');
+    
+    if (isPaused) {
+        pauseIcon.className = 'fas fa-play me-2';
+        pauseText.textContent = '继续';
+        pauseButton.classList.remove('btn-warning');
+        pauseButton.classList.add('btn-success');
+        document.getElementById('currentStep').textContent = '已暂停';
+    } else {
+        pauseIcon.className = 'fas fa-pause me-2';
+        pauseText.textContent = '暂停';
+        pauseButton.classList.remove('btn-success');
+        pauseButton.classList.add('btn-warning');
+        document.getElementById('currentStep').textContent = '已恢复';
+    }
+}
+
+function resetProgress() {
+    if (codeTypingInterval) {
+        clearInterval(codeTypingInterval);
+        codeTypingInterval = null;
+    }
+    displayedCode = '';
+    accumulatedOutput = '';
+    isPaused = false;
+
+    // 重置按钮状态
+    document.getElementById('pauseIcon').className = 'fas fa-pause me-2';
+    document.getElementById('pauseText').textContent = '暂停';
+    const pauseButton = document.getElementById('pauseButton');
+    pauseButton.classList.remove('btn-success');
+    pauseButton.classList.add('btn-warning');
+
+    // 重置横向进度条
+    document.querySelectorAll('.progress-step-horizontal').forEach(step => {
+        step.classList.remove('active', 'completed', 'error');
+    });
+    // 重置竖向进度条
+    document.querySelectorAll('.progress-step-v').forEach(step => {
+        step.classList.remove('active', 'completed', 'error');
+    });
+    // 收起详细进度
+    const detailContainer = document.getElementById('progressDetail');
+    detailContainer.style.maxHeight = '0';
+    detailContainer.style.display = 'none';
+    document.getElementById('toggleProgressIcon').classList.remove('expanded');
+    document.getElementById('toggleProgressBtn').title = '展开详情';
+
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('codeOutput').textContent = '# AI 生成的代码将在这里实时显示...';
+    document.getElementById('hllmContent').innerHTML = '<p class="text-muted mb-0" style="font-size: 0.7rem;">等待启动...</p>';
+    document.getElementById('rmContent').innerHTML = '<p class="text-muted mb-0" style="font-size: 0.7rem;">等待启动...</p>';
+}
+
+function copyCode() {
+    const contentToCopy = accumulatedOutput || currentCode;
+    if(!contentToCopy) return;
+    navigator.clipboard.writeText(contentToCopy)
+        .then(() => showToast('success', '已复制', '内容已复制到剪贴板'))
+        .catch(() => showToast('error', '错误', '复制失败'));
+}
+
+function downloadCode() {
+    const contentToDownload = accumulatedOutput || currentCode;
+    if(!contentToDownload) return;
+    const blob = new Blob([contentToDownload], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'solution.py';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function saveToHistory() {
+    const problem = document.getElementById('problemDescription').value;
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+    
+    const history = JSON.parse(localStorage.getItem('tracecoder_history') || '[]');
+    history.unshift({
+        id: taskId,
+        problem: problem,
+        code: currentCode,
+        success: true, // 此处简化处理
+        duration: duration,
+        timestamp: new Date().toISOString()
+    });
+    
+    localStorage.setItem('tracecoder_history', JSON.stringify(history.slice(0, 50)));
+    
+    updateStats(true);
+    
+    showToast('success', '已保存', '任务已保存到历史记录');
+    bootstrap.Modal.getInstance(document.getElementById('resultModal')).hide();
+}
+
+function updateStats(success) {
+    const stats = JSON.parse(localStorage.getItem('tracecoder_stats') || '{"total":0,"success":0,"avgTime":0}');
+    stats.total++;
+    if (success) stats.success++;
+    stats.avgTime = (stats.avgTime * (stats.total - 1) + parseFloat(((Date.now() - startTime) / 1000).toFixed(1))) / stats.total;
+    localStorage.setItem('tracecoder_stats', JSON.stringify(stats));
+}
+</script>
+{% endblock %}

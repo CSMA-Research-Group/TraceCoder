@@ -1,0 +1,706 @@
+{% extends "base.html" %}
+
+{% block title %}TraceCoder - 帮助中心{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 头部区域 */
+.help-header {
+    text-align: center;
+    padding: 2rem 0 3rem;
+}
+
+.help-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.5rem;
+}
+
+/* 顶部三大特色卡片 */
+.feature-card {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+}
+
+.feature-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+.icon-blue { background: #e0e7ff; color: #4f46e5; }
+.icon-green { background: #d1fae5; color: #10b981; }
+.icon-purple { background: #f3e8ff; color: #7c3aed; }
+
+/* 帮助内容分块面板 (Soft Card) */
+.help-section {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.help-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.help-section-title i {
+    color: var(--primary-color);
+    margin-right: 10px;
+}
+
+/* 步骤引导美化 */
+.step-guide {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.step-guide:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: -15px;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-right: 16px;
+    flex-shrink: 0;
+    border: 2px solid var(--sidebar-bg);
+    z-index: 1;
+}
+
+.step-content {
+    background: var(--bg-color);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    flex-grow: 1;
+}
+
+.step-content h6 {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-main);
+}
+
+/* 工作流程图美化 */
+.workflow-container {
+    background: var(--bg-color);
+    padding: 24px;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+}
+
+.workflow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.workflow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 80px;
+}
+
+.workflow-step .step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    background: var(--sidebar-bg);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.workflow-arrow {
+    color: #cbd5e1;
+    font-size: 1.2rem;
+    margin-top: -24px;
+}
+
+/* 核心机制卡片 (与Generate页风格统一) */
+.mech-card {
+    height: 100%;
+    padding: 20px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+}
+.mech-card.hllm {
+    background: linear-gradient(145deg, #f5f3ff, #ede9fe);
+    border-color: #ddd6fe;
+}
+.mech-card.rm {
+    background: linear-gradient(145deg, #fff7ed, #fef3c7);
+    border-color: #fde68a;
+}
+
+/* FAQ 手风琴美化 (支持平滑动画) */
+.faq-item {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    background: var(--sidebar-bg);
+    overflow: hidden;
+}
+
+.faq-question {
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+    color: var(--text-main);
+    transition: background-color 0.2s ease;
+}
+
+.faq-question:hover {
+    background-color: var(--bg-color);
+}
+
+.faq-question i {
+    color: var(--text-muted);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-answer {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 20px;
+    background-color: var(--bg-color);
+    color: var(--text-muted);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.faq-item.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.faq-item.active .faq-question {
+    color: var(--primary-color);
+}
+
+.faq-item.active .faq-question i {
+    transform: rotate(180deg);
+    color: var(--primary-color);
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px; /* 足够大以显示内容 */
+    opacity: 1;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* 键盘快捷键美化 */
+kbd {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    color: var(--text-main);
+    padding: 3px 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.table > :not(caption) > * > * {
+    padding: 12px 8px;
+    border-bottom-color: var(--border-color);
+}
+
+/* 代码块美化 */
+pre.bg-light {
+    background-color: #1e1e1e !important;
+    border-radius: 8px;
+    padding: 12px !important;
+    border: 1px solid #333;
+}
+pre.bg-light code {
+    color: #d4d4d4;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="help-header">
+        <h1 class="help-title">帮助中心</h1>
+        <p class="text-muted" style="font-size: 1.1rem;">了解如何使用 TraceCoder，解答您的常见问题</p>
+    </div>
+
+    <!-- 顶部卡片导航 -->
+    <div class="row mb-4 g-4">
+        <div class="col-md-4">
+            <div class="feature-card" style="cursor: pointer;" onclick="scrollToSection('quick-start')">
+                <div class="feature-icon-wrapper icon-blue">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h5 class="fw-bold mb-2">快速入门</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">5分钟掌握平台基础操作</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card" style="cursor: pointer;" onclick="scrollToSection('user-guide')">
+                <div class="feature-icon-wrapper icon-green">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h5 class="fw-bold mb-2">使用指南</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">详细的各项功能说明文档</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card" style="cursor: pointer;" onclick="scrollToSection('faq')">
+                <div class="feature-icon-wrapper icon-purple">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h5 class="fw-bold mb-2">常见问题</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">解答您在使用中的疑惑</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 左侧主栏 -->
+        <div class="col-lg-8">
+            <!-- 快速入门 -->
+            <div class="help-section" id="quick-start">
+                <h5 class="help-section-title"><i class="fas fa-flag-checkered"></i>快速入门</h5>
+                
+                <div class="step-guide">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h6>配置 API 密钥</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">前往左侧导航栏的"设置"页面，输入您的 API 密钥。系统支持 OpenAI、Gemini、Claude 等多种主流 LLM 服务。</p>
+                    </div>
+                </div>
+                
+                <div class="step-guide">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h6>输入问题描述</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">在"代码生成"页面，详细描述您想要解决的编程问题。描述越清晰、边界条件越明确，生成的代码越准确。</p>
+                    </div>
+                </div>
+                
+                <div class="step-guide">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h6>编写测试用例</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">使用 Python 原生的 <code>assert</code> 语句编写测试用例，TraceCoder 将以此为基准，自动进行插桩测试和代码修复。</p>
+                    </div>
+                </div>
+                
+                <div class="step-guide">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h6>一键开始生成</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">点击"开始生成"按钮，多智能体系统将自动为您生成代码、沙箱执行测试，并在测试未通过时启动自我修复循环。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工作流程 -->
+            <div class="help-section">
+                <h5 class="help-section-title"><i class="fas fa-diagram-project"></i>智能工作流程</h5>
+                
+                <div class="workflow-container mb-4">
+                    <div class="workflow-diagram">
+                        <div class="workflow-step">
+                            <div class="step-icon text-primary border-primary bg-primary bg-opacity-10"><i class="fas fa-pen-nib"></i></div>
+                            <small class="fw-medium text-dark">问题输入</small>
+                        </div>
+                        <i class="fas fa-angle-right workflow-arrow"></i>
+                        <div class="workflow-step">
+                            <div class="step-icon text-info border-info bg-info bg-opacity-10"><i class="fas fa-wand-magic-sparkles"></i></div>
+                            <small class="fw-medium text-dark">代码生成</small>
+                        </div>
+                        <i class="fas fa-angle-right workflow-arrow"></i>
+                        <div class="workflow-step">
+                            <div class="step-icon text-warning border-warning bg-warning bg-opacity-10"><i class="fas fa-vial"></i></div>
+                            <small class="fw-medium text-dark">执行测试</small>
+                        </div>
+                        <i class="fas fa-angle-right workflow-arrow"></i>
+                        <div class="workflow-step">
+                            <div class="step-icon text-danger border-danger bg-danger bg-opacity-10"><i class="fas fa-rotate"></i></div>
+                            <small class="fw-medium text-dark">调试循环</small>
+                        </div>
+                        <i class="fas fa-angle-right workflow-arrow"></i>
+                        <div class="workflow-step">
+                            <div class="step-icon text-success border-success bg-success bg-opacity-10"><i class="fas fa-check"></i></div>
+                            <small class="fw-medium text-dark">完成修复</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-light p-3 rounded-3 border">
+                    <h6 class="fw-bold mb-2">调试循环详解 (Debug Loop)</h6>
+                    <p class="text-muted mb-2" style="font-size: 0.9rem;">当初始代码未能通过预设的测试用例时，TraceCoder 核心机制将介入：</p>
+                    <ol class="text-muted mb-0 ps-3" style="font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>代码插桩</strong>：自动为代码添加诊断探针，收集运行时变量信息。</li>
+                        <li><strong>执行追踪</strong>：沙箱运行插桩后的代码，抓取完整的执行轨迹 (Trace)。</li>
+                        <li><strong>智能分析</strong>：分析智能体根据轨迹数据与断言错误，精准定位 Bug 根源。</li>
+                        <li><strong>代码修复</strong>：修复智能体参考历史经验，输出修正后的代码版本并重新验证。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 核心机制 -->
+            <div class="help-section">
+                <h5 class="help-section-title"><i class="fas fa-microchip"></i>核心技术机制</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="mech-card hllm">
+                            <h6 class="fw-bold mb-1" style="color: #6d28d9;"><i class="fas fa-brain me-2"></i>HLLM 历史学习机制</h6>
+                            <p class="opacity-75 small mb-3" style="color: #6d28d9;">History Learning Language Model</p>
+                            <ul class="small mb-0 text-dark opacity-75 ps-3" style="line-height: 1.6;">
+                                <li>实时记录每一次失败修复的尝试与原因</li>
+                                <li>避免模型陷入重复相同错误的死循环</li>
+                                <li>在后续修复 prompt 中提供动态历史参考</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mech-card rm">
+                            <h6 class="fw-bold mb-1" style="color: #d97706;"><i class="fas fa-clock-rotate-left me-2"></i>RM 安全回滚机制</h6>
+                            <p class="opacity-75 small mb-3" style="color: #d97706;">Rollback Mechanism</p>
+                            <ul class="small mb-0 text-dark opacity-75 ps-3" style="line-height: 1.6;">
+                                <li>后台实时跟踪测试用例通过率最高的分数</li>
+                                <li>检测到修复引发代码性能大幅退化时介入</li>
+                                <li>防止连续无效修改，自动回滚至最佳版本</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用指南 -->
+            <div class="help-section" id="user-guide">
+                <h5 class="help-section-title"><i class="fas fa-book-open"></i>使用指南</h5>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-gear me-2"></i>设置页面详解</h6>
+                    <div class="bg-light p-3 rounded-3 border">
+                        <ol class="mb-0 ps-3" style="line-height: 1.8;">
+                            <li class="mb-2"><strong>API 核心配置</strong>：输入您的 API 密钥和基础 URL，点击"获取模型列表"按钮加载可用模型</li>
+                            <li class="mb-2"><strong>模型选择</strong>：从加载的模型列表中选择您想要使用的模型，支持多选</li>
+                            <li class="mb-2"><strong>运行参数</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li><strong>最大调试次数</strong>：设置代码失败时的最大修复尝试次数（推荐 3-5 次）</li>
+                                    <li><strong>执行超时</strong>：单次代码执行的最大时间限制（单位：秒）</li>
+                                    <li><strong>回滚阈值</strong>：连续无改进多少次后触发回滚机制</li>
+                                    <li><strong>代码插桩</strong>：启用后会自动在代码中添加诊断探针，帮助定位问题</li>
+                                </ul>
+                            </li>
+                            <li>配置完成后点击"保存配置"按钮，设置会自动保存到本地</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-wand-magic-sparkles me-2"></i>代码生成页面使用</h6>
+                    <div class="bg-light p-3 rounded-3 border">
+                        <ol class="mb-0 ps-3" style="line-height: 1.8;">
+                            <li class="mb-2"><strong>问题描述</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li>清晰、准确地描述您想要解决的编程问题</li>
+                                    <li>包括输入输出格式、边界条件、示例等信息</li>
+                                    <li>描述越详细，生成的代码质量越高</li>
+                                </ul>
+                            </li>
+                            <li class="mb-2"><strong>测试用例</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li>使用 Python 的 <code>assert</code> 语句编写测试用例</li>
+                                    <li>每个 <code>assert</code> 占一行</li>
+                                    <li>覆盖正常情况、边界情况和异常情况</li>
+                                    <li>示例：<code>assert fib(0) == 0</code>、<code>assert fib(1) == 1</code></li>
+                                </ul>
+                            </li>
+                            <li class="mb-2"><strong>快速选择示例</strong>：点击预置的示例按钮，快速填充问题描述和测试用例</li>
+                            <li class="mb-2"><strong>查看配置</strong>：页面顶部显示当前已配置的参数，点击可跳转到设置页面修改</li>
+                            <li><strong>开始生成</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li>点击"开始生成"按钮启动代码生成流程</li>
+                                    <li>可以点击"暂停"按钮暂停，"继续"按钮恢复</li>
+                                    <li>点击"终止"按钮立即停止整个流程</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-tasks me-2"></i>执行进度查看</h6>
+                    <div class="bg-light p-3 rounded-3 border">
+                        <ol class="mb-0 ps-3" style="line-height: 1.8;">
+                            <li class="mb-2"><strong>紧凑模式</strong>：默认显示横向进度条，节省空间</li>
+                            <li class="mb-2"><strong>展开详情</strong>：点击右侧箭头图标展开详细的竖向步骤</li>
+                            <li class="mb-2"><strong>进度步骤</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li><strong>问题理解</strong>：解析您的问题描述</li>
+                                    <li><strong>初始生成</strong>：调用 LLM 生成第一版代码</li>
+                                    <li><strong>代码测试</strong>：在沙箱中运行测试用例</li>
+                                    <li><strong>结果分析</strong>：分析测试结果和错误信息</li>
+                                    <li><strong>调试迭代</strong>：多轮调试修复代码</li>
+                                    <li><strong>任务完成</strong>：输出最终通过所有测试的代码</li>
+                                </ul>
+                            </li>
+                            <li><strong>智能体状态</strong>：查看 HLLM 和 RM 机制的实时运行状态</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-code me-2"></i>代码输出与保存</h6>
+                    <div class="bg-light p-3 rounded-3 border">
+                        <ol class="mb-0 ps-3" style="line-height: 1.8;">
+                            <li class="mb-2"><strong>实时流式输出</strong>：代码会逐字逐句实时显示，类似打字机效果</li>
+                            <li class="mb-2"><strong>代码高亮</strong>：自动对代码进行语法高亮，方便阅读</li>
+                            <li class="mb-2"><strong>行数统计</strong>：右上角显示当前代码的总行数</li>
+                            <li><strong>操作按钮</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li><strong>复制代码</strong>：一键复制代码到剪贴板</li>
+                                    <li><strong>下载文件</strong>：将代码保存为 <code>solution.py</code> 文件</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div>
+                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-clock-rotate-left me-2"></i>历史记录与示例</h6>
+                    <div class="bg-light p-3 rounded-3 border">
+                        <ol class="mb-0 ps-3" style="line-height: 1.8;">
+                            <li class="mb-2"><strong>历史记录</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li>查看所有之前生成的代码任务</li>
+                                    <li>可以查看详细信息、重新运行或删除历史记录</li>
+                                    <li>首页会显示最近的 5 条任务记录</li>
+                                </ul>
+                            </li>
+                            <li class="mb-2"><strong>示例库</strong>：
+                                <ul class="mt-1 ps-3">
+                                    <li>预置了丰富的编程问题示例</li>
+                                    <li>涵盖算法、数据结构、实用工具等多种类型</li>
+                                    <li>点击示例可以直接跳转到代码生成页面并自动填充内容</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧侧边栏 -->
+        <div class="col-lg-4">
+            <!-- 常见问题 -->
+            <div class="help-section" id="faq">
+                <h5 class="help-section-title"><i class="fas fa-circle-question"></i>常见问题</h5>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>如何获取 API 密钥？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="mt-2 mb-2">您可以从以下官方平台注册并获取 API 密钥：</p>
+                        <ul class="mb-3 ps-3">
+                            <li>OpenAI: <a href="https://platform.openai.com" target="_blank" class="text-decoration-none">platform.openai.com</a></li>
+                            <li>Google AI: <a href="https://ai.google.dev" target="_blank" class="text-decoration-none">ai.google.dev</a></li>
+                            <li>Anthropic: <a href="https://console.anthropic.com" target="_blank" class="text-decoration-none">console.anthropic.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>支持哪些编程语言？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="mt-2 mb-3">目前 TraceCoder 核心引擎主要支持 <strong>Python</strong> 的动态代码插桩、执行和修复验证。未来版本计划增加对 JavaScript 和 Java 的支持。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>测试用例如何编写？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="mt-2 mb-2">使用标准的 Python <code>assert</code> 断言语句编写，每行定义一个独立用例：</p>
+                        <pre class="bg-light mb-3"><code>assert func(arg1) == res
+assert func(0) == 1
+assert func(-1) == 0</code></pre>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>代码执行安全吗？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="mt-2 mb-3">代码默认在后端受限沙箱环境中执行，并设置了严格的运行时长和内存限制。但仍建议您<strong>不要让 AI 生成涉及本地系统文件操作或高危网络请求的代码</strong>。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>生成失败的原因可能是什么？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <ul class="mt-2 mb-3 ps-3">
+                            <li>API 密钥无效、格式错误或额度耗尽</li>
+                            <li>本地到 API 提供商的网络连接受阻</li>
+                            <li>问题描述存在严重逻辑歧义</li>
+                            <li>提供的测试用例本身互相矛盾</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快捷键 -->
+            <div class="help-section">
+                <h5 class="help-section-title"><i class="fas fa-keyboard"></i>常用快捷键</h5>
+                
+                <table class="table table-borderless table-sm mb-0 text-muted" style="font-size: 0.9rem;">
+                    <tbody>
+                        <tr>
+                            <td class="px-0"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                            <td class="text-end px-0">开始执行生成</td>
+                        </tr>
+                        <tr>
+                            <td class="px-0"><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+                            <td class="text-end px-0">保存设置配置</td>
+                        </tr>
+                        <tr>
+                            <td class="px-0"><kbd>Ctrl</kbd> + <kbd>B</kbd></td>
+                            <td class="text-end px-0">切换深色主题</td>
+                        </tr>
+                        <tr>
+                            <td class="px-0"><kbd>Tab</kbd></td>
+                            <td class="text-end px-0">代码区输入缩进</td>
+                        </tr>
+                        <tr>
+                            <td class="px-0"><kbd>Esc</kbd></td>
+                            <td class="text-end px-0">关闭浮层模态框</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 关于模块 -->
+            <div class="help-section mb-0">
+                <div class="text-center pt-2">
+                    <div class="d-inline-block bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3">
+                        <i class="fas fa-code-branch fa-2x"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">TraceCoder Framework</h6>
+                    <p class="text-muted small mb-3">Version 1.0.0 (Beta)</p>
+                    <p class="text-muted small px-2">基于轨迹驱动的多智能体代码自动生成与智能修复框架，致力于降低编程门槛与调试成本。</p>
+                    
+                    <div class="d-flex justify-content-center gap-3 mt-4 pt-3 border-top">
+                        <a href="https://github.com" target="_blank" class="text-muted text-decoration-none hover-primary transition-colors">
+                            <i class="fab fa-github fa-lg"></i>
+                        </a>
+                        <a href="mailto:support@example.com" class="text-muted text-decoration-none hover-primary transition-colors">
+                            <i class="fas fa-envelope fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-muted text-decoration-none hover-primary transition-colors">
+                            <i class="fas fa-globe fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 保留原有交互逻辑，结合新增的 CSS 即可实现平滑折叠动画
+function toggleFaq(element) {
+    const item = element.parentElement;
+    item.classList.toggle('active');
+}
+
+// 平滑滚动到指定部分
+function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        const offset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
+</script>
+{% endblock %}

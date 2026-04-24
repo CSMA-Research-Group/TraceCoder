@@ -1,0 +1,661 @@
+{% extends "base.html" %}
+
+{% block title %}TraceCoder - 首页{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 欢迎横幅 - 现代渐变色与玻璃光感 */
+.welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #7c3aed 100%);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    color: white;
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-banner::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+}
+
+.welcome-banner .lead {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+}
+
+.welcome-banner .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.btn-glass {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* 数据统计卡片 - 极简白底彩标 */
+.stat-card {
+    background-color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 1.25rem;
+    flex-shrink: 0;
+}
+
+.stat-content h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+.stat-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+/* 图标配色系统 */
+.icon-primary { background: var(--primary-light); color: var(--primary-color); }
+.icon-success { background: #dcfce7; color: #16a34a; }
+.icon-warning { background: #fef3c7; color: #d97706; }
+.icon-info    { background: #e0f2fe; color: #0284c7; }
+
+/* 现代表格设计 */
+.modern-table thead th {
+    background-color: #f8fafc;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    border-top: none;
+    padding: 1rem 1.25rem;
+}
+
+.modern-table tbody td {
+    padding: 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.875rem;
+}
+
+.modern-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.modern-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* 快速开始列表 */
+.quick-start-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.quick-start-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.quick-start-item:hover {
+    background-color: #f8fafc;
+    border-color: var(--primary-light);
+    transform: translateX(4px);
+}
+
+.quick-start-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.quick-start-content h6 {
+    margin: 0;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.quick-start-content p {
+    font-size: 0.8rem;
+}
+
+/* 核心特性卡片 - 优化版 */
+.feature-card-new {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-card-new:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+}
+
+.feature-icon-new {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+.feature-title {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.feature-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+/* 工作流程优化 */
+.workflow-container-new {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    position: relative;
+}
+
+.workflow-step-new {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.workflow-step-new:last-child {
+    margin-bottom: 0;
+}
+
+.workflow-step-new:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 48px;
+    bottom: -20px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary-color), #cbd5e1);
+}
+
+.workflow-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.workflow-circle.primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.workflow-circle.success {
+    background: #16a34a;
+    color: white;
+}
+
+.workflow-circle.light {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.workflow-content {
+    flex-grow: 1;
+    padding-top: 4px;
+}
+
+.workflow-title {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.workflow-title.highlight {
+    color: var(--primary-color);
+}
+
+.workflow-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="welcome-banner">
+            <div class="row align-items-center">
+                <div class="col-lg-8 position-relative z-1">
+                    <h1 class="display-5 fw-bold mb-3" style="letter-spacing: -1px;">
+                        <i class="fas fa-code-branch me-3 opacity-75"></i>欢迎使用 TraceCoder
+                    </h1>
+                    <p class="lead mb-2">基于轨迹驱动的多智能体代码自动生成与修复框架</p>
+                    <p class="text-muted mb-0">通过智能调试循环，自动修复大语言模型生成的代码问题，提升开发效率。</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0 position-relative z-1">
+                    <a href="{{ url_for('generate_page') }}" class="btn btn-glass btn-lg px-4 rounded-pill shadow-sm">
+                        <i class="fas fa-rocket me-2"></i>开始生成代码
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon icon-primary">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="totalTasks">0</h3>
+                <p>总任务数</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon icon-success">
+                <i class="fas fa-circle-check"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="successTasks">0</h3>
+                <p>成功任务</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon icon-warning">
+                <i class="fas fa-stopwatch"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="avgTime">0s</h3>
+                <p>平均耗时</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon icon-info">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="successRate">0%</h3>
+                <p>成功率</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    <!-- 历史记录区 -->
+    <div class="col-lg-8">
+        <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-clock-rotate-left text-primary me-2"></i>最近任务</h6>
+                <a href="{{ url_for('history_page') }}" class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-medium" style="font-size: 0.8rem;">查看全部</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table modern-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>问题描述</th>
+                                <th>状态</th>
+                                <th>耗时</th>
+                                <th>时间</th>
+                                <th class="text-end">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTasks">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-inbox fa-2x text-secondary opacity-50"></i>
+                                        </div>
+                                        <span class="fw-medium">暂无历史记录</span>
+                                        <small class="mt-1">生成的任务将显示在这里</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速开始区 -->
+    <div class="col-lg-4">
+        <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-bolt text-warning me-2"></i>快速开始</h6>
+            </div>
+            <div class="card-body">
+                <div class="quick-start-list">
+                    <a href="{{ url_for('generate_page') }}" class="quick-start-item">
+                        <div class="quick-start-icon" style="background-color: var(--primary-color);">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="quick-start-content">
+                            <h6>新建任务</h6>
+                            <p class="text-muted mb-0">输入问题描述开始生成代码</p>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('examples_page') }}" class="quick-start-item">
+                        <div class="quick-start-icon bg-success">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="quick-start-content">
+                            <h6>浏览示例</h6>
+                            <p class="text-muted mb-0">查看预置的编程问题示例</p>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('settings_page') }}" class="quick-start-item">
+                        <div class="quick-start-icon bg-secondary">
+                            <i class="fas fa-gear"></i>
+                        </div>
+                        <div class="quick-start-content">
+                            <h6>配置参数</h6>
+                            <p class="text-muted mb-0">设置API密钥和模型偏好</p>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('help_page') }}" class="quick-start-item">
+                        <div class="quick-start-icon bg-info">
+                            <i class="fas fa-circle-question"></i>
+                        </div>
+                        <div class="quick-start-content">
+                            <h6>查看帮助</h6>
+                            <p class="text-muted mb-0">了解如何使用TraceCoder</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 核心特性与工作流程 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h5 class="fw-bold mb-4 text-center">
+            <i class="fas fa-star text-warning me-2"></i>核心特性与工作流程
+        </h5>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-star text-warning me-2"></i>核心特性</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="feature-card-new">
+                            <div class="feature-icon-new icon-primary">
+                                <i class="fas fa-wand-magic-sparkles"></i>
+                            </div>
+                            <h6 class="feature-title">智能代码生成</h6>
+                            <p class="feature-desc">基于大语言模型，根据问题描述自动生成高质量代码</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card-new">
+                            <div class="feature-icon-new" style="background: #fef3c7; color: #d97706;">
+                                <i class="fas fa-bug-slash"></i>
+                            </div>
+                            <h6 class="feature-title">自动错误修复</h6>
+                            <p class="feature-desc">通过智能调试循环，自动定位并修复代码中的错误</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card-new">
+                            <div class="feature-icon-new" style="background: #dcfce7; color: #16a34a;">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <h6 class="feature-title">轨迹驱动调试</h6>
+                            <p class="feature-desc">深度的Trace-driven分析，精准定位问题根源</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card-new">
+                            <div class="feature-icon-new" style="background: #e0f2fe; color: #0284c7;">
+                                <i class="fas fa-users-rectangle"></i>
+                            </div>
+                            <h6 class="feature-title">多智能体协作</h6>
+                            <p class="feature-desc">多个智能体协同工作，确保代码质量与健壮性</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card-new">
+                            <div class="feature-icon-new" style="background: #f3e8ff; color: #7c3aed;">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h6 class="feature-title">历史学习机制</h6>
+                            <p class="feature-desc">创新的HLLM机制，从历史错误中学习避免重复</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card-new">
+                            <div class="feature-icon-new" style="background: #ffe4e6; color: #dc2626;">
+                                <i class="fas fa-rotate-left"></i>
+                            </div>
+                            <h6 class="feature-title">智能回滚机制</h6>
+                            <p class="feature-desc">RM机制防止修复退化，自动回滚到最佳版本</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-network-wired text-primary me-2"></i>工作流程</h6>
+            </div>
+            <div class="card-body">
+                <div class="workflow-container-new">
+                    <div class="workflow-step-new">
+                        <div class="workflow-circle primary">1</div>
+                        <div class="workflow-content">
+                            <h6 class="workflow-title">问题描述与用例输入</h6>
+                            <p class="workflow-desc">清晰描述您的编程问题，编写测试用例</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-new">
+                        <div class="workflow-circle light">2</div>
+                        <div class="workflow-content">
+                            <h6 class="workflow-title">初始代码生成</h6>
+                            <p class="workflow-desc">调用大语言模型生成第一版代码</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-new">
+                        <div class="workflow-circle light">3</div>
+                        <div class="workflow-content">
+                            <h6 class="workflow-title">自动化沙箱测试</h6>
+                            <p class="workflow-desc">在安全沙箱环境中执行测试用例</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-new">
+                        <div class="workflow-circle primary">4</div>
+                        <div class="workflow-content">
+                            <h6 class="workflow-title highlight">轨迹插桩与调试循环（核心）</h6>
+                            <p class="workflow-desc">通过轨迹驱动分析，多轮迭代修复代码问题</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-new">
+                        <div class="workflow-circle success"><i class="fas fa-check"></i></div>
+                        <div class="workflow-content">
+                            <h6 class="workflow-title" style="color: #16a34a;">输出最终可靠方案</h6>
+                            <p class="workflow-desc">交付通过所有测试的高质量代码</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+    loadRecentTasks();
+});
+
+function loadDashboardStats() {
+    const stats = JSON.parse(localStorage.getItem('tracecoder_stats') || '{"total":0,"success":0,"avgTime":0}');
+    
+    document.getElementById('totalTasks').textContent = stats.total;
+    document.getElementById('successTasks').textContent = stats.success;
+    document.getElementById('avgTime').textContent = stats.avgTime > 0 ? stats.avgTime.toFixed(1) + 's' : '0s';
+    
+    const rate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0;
+    document.getElementById('successRate').textContent = rate + '%';
+}
+
+function loadRecentTasks() {
+    const history = JSON.parse(localStorage.getItem('tracecoder_history') || '[]');
+    const tbody = document.getElementById('recentTasks');
+    
+    if (history.length === 0) {
+        return;
+    }
+    
+    const recentTasks = history.slice(0, 5);
+    
+    tbody.innerHTML = recentTasks.map(task => `
+        <tr>
+            <td>
+                <div class="text-truncate fw-medium" style="max-width: 250px;" title="${escapeHtml(task.problem)}">
+                    ${escapeHtml(task.problem.substring(0, 50))}${task.problem.length > 50 ? '...' : ''}
+                </div>
+            </td>
+            <td>
+                <span class="badge ${task.success ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25'} rounded-pill px-2 py-1">
+                    <i class="fas ${task.success ? 'fa-check-circle' : 'fa-circle-xmark'} me-1"></i>${task.success ? '成功' : '失败'}
+                </span>
+            </td>
+            <td><span class="text-muted"><i class="fas fa-clock me-1 opacity-50"></i>${task.duration || '-'}s</span></td>
+            <td><span class="text-muted">${formatTime(task.timestamp)}</span></td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-light text-primary bg-white border shadow-sm rounded-circle" style="width:32px; height:32px; padding:0;" onclick="viewTask('${task.id}')" title="查看详情">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function formatTime(timestamp) {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return '刚刚';
+    if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+    return date.toLocaleDateString();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function viewTask(id) {
+    window.location.href = `/history/${id}`;
+}
+</script>
+{% endblock %}
