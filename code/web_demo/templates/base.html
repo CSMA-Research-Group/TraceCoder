@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TraceCoder 论文方法复现：观察执行轨迹、分析缺陷、验证修复与历史回滚。">
+  <title>TraceCoder · 轨迹驱动的智能代码修复</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+  <script src="/system.js" defer></script>
+  <script src="/portal.js" defer></script>
+  <link rel="stylesheet" href="/portal.css">
+</head>
+<body data-initial-view="{{ active_page }}" data-run-id="{{ run_id }}">
+  <a class="skip-link" href="#view-overview">跳转到主要内容</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="TraceCoder 首页"><span class="brandmark">t<span>c</span></span><strong>TraceCoder<span class="version-tag">2.1</span></strong></a>
+    <div class="topbar-context"><span class="context-slash">/</span> 智能代码修复系统 <span class="environment-chip">OFFICIAL BASELINE</span></div>
+    <nav aria-label="工具导航"><span class="connection"><i></i><span id="connection-text">连接中</span></span><button id="about-button" class="ghost">论文方法 ↗</button><button id="package-button" class="secondary">代码包 ↓</button><button id="access-button" class="avatar-button" aria-label="服务器访问口令">TC</button></nav>
+  </header>
+  <div class="system-shell">
+    <aside class="app-nav" aria-label="主导航">
+      <div class="nav-label">CONTROL CENTER</div>
+      <nav class="primary-nav">
+        <button data-view="overview"><span class="nav-icon">◫</span><span>系统总览</span><small>01</small></button>
+        <button data-view="generate"><span class="nav-icon">✧</span><span>生成与修复</span><small>02</small></button>
+        <button data-view="workbench"><span class="nav-icon">⌘</span><span>修复工作台</span><small>03</small></button>
+        <button data-view="projects"><span class="nav-icon">▱</span><span>项目空间</span><small id="nav-project-count">04</small></button>
+        <button data-view="runs" id="history-button"><span class="nav-icon">≋</span><span>运行历史</span><small>05</small></button>
+        <button data-view="examples"><span class="nav-icon">▦</span><span>官方示例</span><small>06</small></button>
+        <button data-view="settings"><span class="nav-icon">⚙</span><span>运行设置</span><small>07</small></button>
+        <button data-view="deployment"><span class="nav-icon">⬡</span><span>部署中心</span><small>08</small></button>
+        <button data-view="help"><span class="nav-icon">?</span><span>帮助与方法</span><small>09</small></button>
+      </nav>
+      <div class="nav-divider"></div>
+      <div class="nav-label">METHODOLOGY</div>
+      <div class="method-nav"><span>◉</span><div><strong>Trace · Learn · Repair</strong><small>三智能体 / 历史学习 / 回滚</small></div></div>
+      <div class="nav-bottom"><div class="system-mini"><i class="status-dot"></i><span>执行证据可追溯</span></div><p>ICSE 2026 · TraceCoder</p><span class="mono muted">RESEARCH TO APPLICATION</span></div>
+    </aside>
+    <div class="page-container">
+      <div id="notice" class="notice" role="status" hidden></div>
+      <section id="view-overview" class="system-view" aria-label="系统总览"{% if active_page != 'overview' %} hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">OVERVIEW / 系统总览</p><h1>代码修复的每一步，都有依据。</h1></div><span class="outline-chip"><i class="status-dot"></i> 本地工作空间</span></div>
+        <section class="command-hero">
+          <div class="hero-copy"><div class="hero-overline"><span class="live-signal"></span> TRACE-DRIVEN CODE REPAIR <span>ICSE ’26</span></div><h2>读懂执行轨迹。<br>让代码<span>可靠进化。</span></h2><p>从失败测试出发，连接运行观察、智能诊断与候选验证。<br>把每一次修复，变成可检查、可追溯的工程过程。</p><div class="hero-buttons"><button class="primary" id="launch-demo">体验修复闭环 <span>↗</span></button><button class="secondary" data-view="generate">从需求开始 <span>＋</span></button></div><div class="hero-footnote"><span>● 真实测试执行</span><span>◇ 完整证据留存</span><span>↶ 历史最优回滚</span></div></div>
+          <div class="engine-visual" aria-label="三个智能体围绕运行轨迹协作">
+            <svg viewBox="0 0 430 330" role="img" aria-label="插桩、分析、修复三个智能体围绕执行轨迹协作，经过测试与回滚闭环">
+              <defs><radialGradient id="orb"><stop offset="0" stop-color="#28cfcd" stop-opacity=".18"/><stop offset="1" stop-color="#28cfcd" stop-opacity="0"/></radialGradient><linearGradient id="orbitLine"><stop stop-color="#2de0ce"/><stop offset="1" stop-color="#7f7bfa"/></linearGradient></defs>
+              <circle cx="215" cy="165" r="156" fill="url(#orb)"/><ellipse cx="215" cy="165" rx="169" ry="116" fill="none" stroke="#213443" stroke-dasharray="3 7"/><circle cx="215" cy="165" r="100" fill="none" stroke="#29444d"/>
+              <path class="orbit-path" d="M215 65 A100 100 0 1 1 128 215" fill="none" stroke="url(#orbitLine)" stroke-width="1.5" stroke-dasharray="125 24"/>
+              <path d="M215 80V123M132 210L171 187M297 210L258 187" stroke="#2b797e" stroke-dasharray="4 5"/>
+              <path d="M215 111l47 27v54l-47 27-47-27v-54z" fill="#0d222e" stroke="#359197"/>
+              <text x="215" y="168" class="orb-title" text-anchor="middle">TC</text><text x="215" y="190" class="orb-caption" text-anchor="middle">TRACE ENGINE</text>
+              <g class="orb-node"><rect x="157" y="35" width="116" height="48" rx="9"/><text x="215" y="54" text-anchor="middle" class="orb-label">INSTRUMENT</text><text x="215" y="71" text-anchor="middle">插桩智能体</text></g>
+              <g class="orb-node"><rect x="46" y="213" width="116" height="48" rx="9"/><text x="104" y="232" text-anchor="middle" class="orb-label">ANALYZE</text><text x="104" y="249" text-anchor="middle">分析智能体</text></g>
+              <g class="orb-node purple"><rect x="269" y="213" width="116" height="48" rx="9"/><text x="327" y="232" text-anchor="middle" class="orb-label">REPAIR</text><text x="327" y="249" text-anchor="middle">修复智能体</text></g>
+              <circle cx="215" cy="65" r="3" fill="#58e4d0"/><circle cx="128" cy="215" r="3" fill="#58e4d0"/><circle cx="301" cy="215" r="3" fill="#9b90ff"/>
+              <text x="215" y="303" text-anchor="middle" class="orb-bottom">FIXED TESTS · HLLM · ROLLBACK</text>
+            </svg>
+          </div>
+        </section>
+        <section class="overview-stats" aria-label="工作空间真实统计">
+          <article><div><span>运行记录</span><span class="stat-icon">↗</span></div><strong id="overview-runs">—</strong><p id="overview-mode-counts">读取本实例已保存记录</p></article>
+          <article><div><span>项目与任务</span><span class="stat-icon purple-text">▱</span></div><strong id="overview-projects">—</strong><p id="overview-task-count">版本化管理代码与固定测试</p></article>
+          <article><div><span>执行队列</span><span class="stat-icon">≋</span></div><strong id="overview-active">—</strong><p id="overview-queue">读取实际执行状态</p></article>
+          <article><div><span>研究任务库</span><span class="stat-icon purple-text">▦</span></div><strong id="overview-benchmarks">1,568</strong><p>4 套本地数据集 · 参考解隔离</p></article>
+        </section>
+        <div class="overview-grid"><section class="panel"><div class="panel-heading"><div><span class="section-kicker">RECENT ACTIVITY</span><h2>最近运行</h2></div><button class="text-button" data-view="runs">查看全部 ↗</button></div><div id="overview-recent" class="table-wrap"></div></section><section class="panel readiness-card"><div class="panel-heading"><div><span class="section-kicker">ENVIRONMENT</span><h2>接入状态</h2></div><span class="outline-chip">本实例</span></div><div id="overview-readiness"></div><button class="text-button" data-view="deployment">打开部署中心 →</button></section></div>
+        <section class="scenario-section"><div class="section-heading"><div><span class="section-kicker">FROM RESEARCH TO WORKFLOW</span><h2>进入真实研发流程</h2></div><span class="muted">单文件 Python · 固定测试驱动</span></div><div class="scenario-grid"><button class="scenario-card" id="scenario-api"><span class="scenario-icon">⌁</span><span class="scenario-no">01 / APPLICATION</span><h3>业务逻辑回归</h3><p>用 API 请求窗口案例，追踪边界条件如何造成计数偏差。</p><span class="scenario-link">运行场景演示 ↗</span></button><button class="scenario-card" data-view="projects"><span class="scenario-icon purple-text">▱</span><span class="scenario-no">02 / PROJECT</span><h3>项目缺陷工作流</h3><p>导入失败代码与测试，冻结输入版本，生成供人工评审的修复包。</p><span class="scenario-link">建立项目空间 ↗</span></button><button class="scenario-card" data-view="deployment"><span class="scenario-icon">⌘</span><span class="scenario-no">03 / INTEGRATION</span><h3>CI 辅助修复</h3><p>通过 API 提交任务、查询状态，带回补丁、测试与完整执行证据。</p><span class="scenario-link">查看接入方式 ↗</span></button></div></section>
+      </section>
+      <section id="view-workbench" class="system-view" aria-label="修复工作台"{% if active_page != 'workbench' %} hidden{% endif %}>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="实验配置">
+      <div class="section-kicker">WORKSPACE <span>01</span></div>
+      <h2>配置一次修复</h2>
+      <label class="field-label">运行模式</label>
+      <div class="segmented" aria-label="运行模式"><button id="fixture-mode" class="active" aria-pressed="true">预设响应演示</button><button id="live-mode" aria-pressed="false">真实模型</button></div>
+      <p class="mode-note" id="mode-note">无需密钥。使用预设的智能体响应，每次都真实执行代码与测试。</p>
+      <div id="live-controls" hidden>
+        <label class="field-label" for="dataset">数据集</label><select id="dataset"><option value="demo">演示案例</option><option value="project">项目任务</option><option value="humaneval">HumanEval · 164</option><option value="humanevalplus">HumanEval+ · 164</option><option value="classeval">ClassEval · 100</option><option value="bigcodebench">BigCodeBench · 1140</option></select>
+        <div id="benchmark-picker" hidden><label class="field-label" for="benchmark-task">任务</label><select id="benchmark-task"></select></div>
+        <label class="field-label" for="start-mode">初始实现</label><select id="start-mode"><option value="frozen">从当前代码开始修复</option><option value="generate">由模型生成初始实现</option></select>
+      </div>
+      <div class="field-label case-heading">选择案例 <span id="case-count">04</span></div>
+      <div id="case-list" class="case-list"></div>
+      <div class="divider"></div>
+      <div class="field-label">迭代设置 <span class="mini-badge">复现默认</span></div>
+      <div class="setting-row"><label for="max-rounds">最多修复轮数</label><select id="max-rounds"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select></div>
+      <div class="setting-row"><label for="patience">连续无提升上限</label><select id="patience"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="setting-row"><label for="timeout">单次执行超时</label><select id="timeout"><option>5</option><option selected>10</option><option>20</option><option>30</option></select><span class="unit">秒</span></div>
+      <label class="toggle-line"><input type="checkbox" id="enable-instrumentation" checked> 启用诊断插桩 <small>关闭为消融配置</small></label>
+      <div class="sidebar-bottom"><span class="shield-icon">◇</span><div><strong>结果来自实际执行</strong><p>固定测试 · 逐轮记录 · 可导出证据</p></div></div>
+      <button class="text-button" data-view="projects">从项目空间选择任务 →</button>
+    </aside>
+
+    <main>
+      <div class="hero"><div><p class="eyebrow"><span class="tiny-line"></span> TRACE-DRIVEN DEBUGGING</p><h1>修复工作台<span> /</span></h1><p class="hero-description">从运行轨迹定位问题，让每一轮修复都有依据。</p></div><div class="hero-mark" aria-hidden="true"><span>observe</span><b>→</b><span>analyze</span><b>→</b><span>repair</span></div></div>
+      <section class="task-bar" aria-label="当前任务"><div><div class="task-meta"><span class="status-dot"></span><span id="task-subtitle">加载案例</span></div><h2 id="task-title">正在读取本地数据…</h2><div class="tags" id="task-tags"></div></div><div class="run-actions"><button id="cancel-button" class="secondary" hidden>停止</button><button id="run-button" class="primary" disabled><span>开始演示</span><span>↗</span></button></div></section>
+
+      <div class="run-label"><span class="evidence-label" id="evidence-label">预设智能体响应 · 本次真实执行</span><span id="run-status" aria-live="polite">准备就绪</span></div>
+      <section class="pipeline" aria-label="论文方法流程" id="pipeline">
+        <div data-stage="initial_test"><span class="step-number">01</span><strong>初始测试</strong><small>建立失败基线</small></div>
+        <div data-stage="instrumentation"><span class="step-number">02</span><strong>插桩智能体</strong><small>添加诊断探针</small></div>
+        <div data-stage="trace"><span class="step-number">03</span><strong>轨迹执行</strong><small>观察内部状态</small></div>
+        <div data-stage="analysis"><span class="step-number">04</span><strong>分析智能体</strong><small>诊断与历史学习</small></div>
+        <div data-stage="repair"><span class="step-number">05</span><strong>修复智能体</strong><small>实施修复计划</small></div>
+        <div data-stage="decision"><span class="step-number">06</span><strong>验证与回滚</strong><small>保留最优实现</small></div>
+      </section>
+      <section class="metrics" aria-label="本次执行指标"><div><span>当前最优测试</span><strong id="metric-tests">—<small> / —</small></strong><p id="metric-baseline">等待初始测试</p></div><div><span>修复轮次</span><strong id="metric-rounds">0<small> / 5</small></strong><p id="metric-decisions">最多 5 轮，连续 2 轮无提升时停止</p></div><div><span>历史教训 HLLM</span><strong id="metric-lessons">0<small> 条</small></strong><p>保留失败候选与对应反馈</p></div><div class="trend-card"><span>测试通过数变化</span><div id="score-chart" class="score-chart"><span>运行后显示每轮实际结果</span></div><p><i class="legend-dot"></i>候选结果 <i class="legend-dot best"></i>历史最优</p></div></section>
+
+      <div class="workgrid">
+        <section class="panel evidence-panel">
+          <div class="panel-heading"><div><span class="section-kicker">EXECUTION EVIDENCE</span><h2>打开修复的每一步</h2></div><select id="round-select" aria-label="选择修复轮次"><option value="0">初始状态</option></select></div>
+          <div class="tabs" role="tablist" aria-label="执行证据"><button role="tab" aria-selected="true" class="active" data-tab="trace">运行轨迹</button><button role="tab" aria-selected="false" data-tab="analysis">诊断与计划</button><button role="tab" aria-selected="false" data-tab="diff">代码变更</button><button role="tab" aria-selected="false" data-tab="lessons">历史教训 <span id="lesson-badge">0</span></button><button role="tab" aria-selected="false" data-tab="calls">调用记录</button></div>
+          <div id="evidence-content" class="evidence-content" role="tabpanel"></div>
+        </section>
+        <section class="panel code-panel"><div class="panel-heading"><div><span class="section-kicker">SOURCE INSPECTOR</span><h2>实现与测试</h2></div><span class="language-badge">Python</span></div><div class="code-tabs"><button class="active" data-code="initial">初始代码</button><button data-code="instrumented">插桩代码</button><button data-code="final">最优代码</button><button data-code="tests">固定测试</button></div><div class="code-caption"><span id="code-filename">initial.py</span><button id="copy-code" class="text-button">复制</button></div><pre id="source-code" tabindex="0" aria-label="源代码"></pre><textarea id="code-editor" spellcheck="false" aria-label="待修复的初始代码" hidden></textarea><div class="code-footer"><span id="code-lines">0 lines</span><span id="code-hash">固定输入</span></div><details class="task-details"><summary>任务描述与数据来源 <span>↗</span></summary><p id="task-provenance"></p><pre id="task-description"></pre></details></section>
+      </div>
+      <section class="panel event-panel"><div class="event-top"><div><span class="section-kicker">RUN JOURNAL</span><h2>执行记录</h2></div><div><button id="export-button" class="secondary" disabled>导出完整记录 ↓</button><button id="download-code" class="secondary" disabled>下载最优代码 ↓</button><button id="bundle-button" class="primary" disabled>评审包 ↓</button></div></div><div id="event-log" class="event-log"><p>启动后，逐步记录智能体调用、测试执行和回滚决策。</p></div></section>
+      <footer><span>TraceCoder · 官方源码整合 · 论文方法实现</span><span>观察 → 分析 → 修复 <i>·</i> HLLM + Rollback</span><span>演示结果不等于论文基准实验结果</span></footer>
+    </main>
+  </div>
+      </section>
+      <section id="view-projects" class="system-view" aria-label="项目空间"{% if active_page != 'projects' %} hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">PROJECT SPACE / 项目空间</p><h1>从项目中的失败测试开始。</h1><p>保存可追溯的输入版本，连接修复与代码评审。</p></div><button class="primary" id="new-project">创建项目 ＋</button></div>
+        <div class="info-strip"><span>◇</span><p>支持单文件 Python 与顶层 <code>assert</code> / <code>unittest</code> / <code>check(candidate)</code>。导入不执行代码；真实修复在配置好的独立容器中进行。</p></div>
+        <div class="projects-layout"><div id="project-list" class="project-list"></div><section class="panel project-detail"><div id="project-detail"></div></section></div>
+      </section>
+      <section id="view-runs" class="system-view" aria-label="运行中心"{% if active_page != 'runs' %} hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">RUN CENTER / 运行中心</p><h1>每一次尝试，都有完整记录。</h1><p>查看队列、复核历史结果，导出可审阅的修复证据。</p></div><button class="secondary" id="refresh-runs">刷新记录 ↻</button></div>
+        <div class="run-filters"><label class="search-field"><span>⌕</span><input id="run-search" type="search" placeholder="搜索任务名称或运行 ID" aria-label="搜索运行记录"></label><select id="run-filter-mode" aria-label="按运行模式筛选"><option value="">全部模式</option><option value="fixture">预设响应演示</option><option value="live">真实模型</option></select><select id="run-filter-status" aria-label="按状态筛选"><option value="">全部状态</option><option value="queued">排队中</option><option value="running">运行中</option><option value="completed">已完成</option><option value="error">执行错误</option><option value="cancelled">已取消</option></select><button id="compare-runs" class="secondary" disabled>对比所选 (0/2)</button></div>
+        <section class="panel"><div id="runs-table" class="table-wrap"></div><div class="pagination"><span id="run-total"></span><div><button id="prev-runs" class="secondary">← 上一页</button><button id="next-runs" class="secondary">下一页 →</button></div></div></section>
+        <p class="footnote">“已完成”指流程正常结束；测试通过数和停止原因需单独核查。演示记录与真实模型记录分别标识。</p>
+      </section>
+      <section id="view-deployment" class="system-view" aria-label="部署中心"{% if active_page != 'deployment' %} hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">DEPLOYMENT / 部署中心</p><h1>从本地工作台，到团队基础设施。</h1><p>配置模型与隔离执行器，按部署检查逐项接入。</p></div><button id="refresh-deployment" class="secondary">重新读取检查 ↻</button></div>
+        <div class="deployment-grid"><section class="panel"><div class="panel-heading"><div><span class="section-kicker">READINESS CHECK</span><h2>当前实例环境</h2></div><span id="deployment-version" class="outline-chip"></span></div><div id="deployment-checks"></div><p class="panel-note">检查不触发模型调用。配置可读、容器可用与真实接口联调是不同阶段；缓存最多 30 秒。</p></section><section class="panel architecture-panel"><div class="panel-heading"><div><span class="section-kicker">SYSTEM ARCHITECTURE</span><h2>职责分离，证据贯通</h2></div></div><div class="architecture"><div>浏览器工作台 <small>项目 / 运行 / 评审</small></div><span>↓ HTTP API</span><div>任务队列与论文执行引擎 <small>版本冻结 · HLLM · Rollback</small></div><span>↙ &nbsp; &nbsp; ↓ &nbsp; &nbsp; ↘</span><div class="architecture-branches"><div>模型接口<small>同一模型 / 三个角色</small></div><div>隔离执行器<small>无网络 / 资源限额</small></div><div>持久化证据<small>SQLite / 运行文件</small></div></div><span>↓</span><div>修复评审包 <small>补丁 + 测试 + 报告 + 请求记录</small></div></div></section></div>
+        <div class="deploy-profiles"><section class="panel"><span class="profile-number">01</span><h3>演示部署</h3><p>无需模型密钥。固定演示案例可公开展示，关闭项目写入与任意代码执行。</p><pre>docker compose -f code/deploy/compose.yaml up --build -d</pre><span class="outline-chip">Compose · 只读容器 · 持久卷</span></section><section class="panel"><span class="profile-number purple-text">02</span><h3>团队工作台</h3><p>独立 Linux 主机部署，接入模型服务与 Docker 执行镜像。适用于同一信任域的研究组或开发团队。</p><pre>python3 code/scripts/doctor.py --require-live</pre><span class="outline-chip">systemd · HTTPS 代理 · 访问口令</span></section></div>
+        <section class="panel integration-panel"><div class="panel-heading"><div><span class="section-kicker">CI / API INTEGRATION</span><h2>把修复建议带回研发流程</h2></div><button class="text-button" id="api-contract">查看 API 契约 ↗</button></div><div class="integration-content"><ol><li><b>01</b><div><strong>冻结输入</strong><p>提交任务 JSON，保存代码、测试和来源版本。</p></div></li><li><b>02</b><div><strong>执行修复</strong><p>进入有界队列，轮询实际运行状态。</p></div></li><li><b>03</b><div><strong>人工评审</strong><p>带回补丁与证据包，由团队决定是否应用。</p></div></li></ol><pre>python3 code/integrations/ci_submit.py \
+  --server https://tracecoder.example \
+  --project PROJECT_ID \
+  --task-file data/templates/api-window.task.json \
+  --output ./tracecoder-artifacts</pre></div></section>
+      </section>
+      {% include "portal_views.html" %}
+      <footer class="system-footer"><span>TraceCoder <b>v2.1</b> · 轨迹驱动的智能代码修复</span><span>官方源码整合 · 论文方法实现 <i>·</i> 从证据到修复</span></footer>
+    </div>
+  </div>
+  <dialog id="modal"><div class="modal-top"><h2 id="modal-title"></h2><button id="close-modal" class="ghost" aria-label="关闭">✕</button></div><div id="modal-content"></div></dialog>
+</body>
+</html>

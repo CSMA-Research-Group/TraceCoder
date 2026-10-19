@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "archive": "TraceCoder-2.1.0.zip",
+  "sha256": "26391dfbfd33a6c5fc074ff189b39b22620bfc60cb4453334b396064df95a67a",
+  "bytes": 3386488,
+  "archive_files": 105,
+  "manifest_files_verified": 103,
+  "served_download_matches": true,
+  "user_state_or_secrets_packaged": false,
+  "clean_tested_runtime_files_match": 71,
+  "markdown_local_links_valid": true,
+  "unit_tests": 58,
+  "workspace_http_checks": 79,
+  "clean_package_http_checks": 78,
+  "model_calls": 0,
+  "docker_built": false,
+  "public_deployment": false
+}

@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-10-19T01:54:09.223030+00:00",
+  "passed": true,
+  "official_branches": [
+    {
+      "branch": "main",
+      "commit": "cbd536eb5a02b53ee835cae2f07f5b7ed8bb694d",
+      "files_checked": 60,
+      "unchanged": true,
+      "clean": true
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "commit": "49beb48ce6d62cfd97b4714fbc8c1887879af43f",
+      "files_checked": 101,
+      "unchanged": true,
+      "clean": true
+    }
+  ],
+  "original_files_checked": 34,
+  "official_prompt_bodies_equal": {
+    "_build_instrumentation_prompt": true,
+    "_build_analysis_planning_prompt": true,
+    "_build_code_implementation_prompt": true
+  },
+  "official_examples_equal": true,
+  "official_examples": 12,
+  "backup_sha256": "e1d774ae155841197054743055a1356a1d9912ce6dfbdf4112ebd6807bcef237",
+  "backup_verified": true,
+  "errors": []
+}

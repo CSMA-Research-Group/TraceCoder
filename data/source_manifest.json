@@ -1,0 +1,38 @@
+[
+  {
+    "dataset": "humaneval",
+    "source": "datasets/human_eval/data/HumanEval.jsonl.gz",
+    "source_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+    "output": "data/benchmarks/humaneval.jsonl",
+    "output_sha256": "621ff099e7d6a9b630619acd3568aef441dec51a8c84f881a9dd1f2d2ed15914",
+    "rows": 164,
+    "transformation": "JSON/JSONL serialization only; all fields including tests and reference solutions retained"
+  },
+  {
+    "dataset": "humanevalplus",
+    "source": "datasets/human_eval_plus/data/test-00000-of-00001-5973903632b82d40.parquet",
+    "source_sha256": "4436f5c03d77c17e0cbc57543b90665b5c1266f55a43992a5ed7922cd34a7558",
+    "output": "data/benchmarks/humanevalplus.jsonl",
+    "output_sha256": "3ba932b106ac271a2dd2be188e5069a5e92f8a2f5a44f10b8f582a0d3e3619f9",
+    "rows": 164,
+    "transformation": "JSON/JSONL serialization only; all fields including tests and reference solutions retained"
+  },
+  {
+    "dataset": "classeval",
+    "source": "datasets/ClassEval/data/ClassEval_data.json",
+    "source_sha256": "50a1ac0e4d0c238573c10c0ab11feae00b14a80ae9e4c9cc28148707ecf0b6a2",
+    "output": "data/benchmarks/classeval.jsonl",
+    "output_sha256": "09d04e5f52413e9846e871517f67e0a1989c9afc22956340506048d6230a77aa",
+    "rows": 100,
+    "transformation": "JSON/JSONL serialization only; all fields including tests and reference solutions retained"
+  },
+  {
+    "dataset": "bigcodebench",
+    "source": "datasets/BigCodeBench/data/v0.1.4-00000-of-00001.parquet",
+    "source_sha256": "d9a4965821c9507ebdfb551c288656b2d5fe553234f5183044333ca8a4018267",
+    "output": "data/benchmarks/bigcodebench.jsonl",
+    "output_sha256": "f6704a124f4edcec9d12cc7912f41f3d4207f51b87f091d136e3436f7e25149f",
+    "rows": 1140,
+    "transformation": "JSON/JSONL serialization only; all fields including tests and reference solutions retained"
+  }
+]

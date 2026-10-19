@@ -1,0 +1,9 @@
+FROM python:3.10-slim
+# Minimal support for the supplied expanded HumanEval tests.
+# Task-specific ClassEval/BigCodeBench dependencies belong in a separate pinned image.
+RUN pip install --no-cache-dir numpy==1.26.4
+ENV PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+COPY code/tracecoder/worker.py /worker.py
+WORKDIR /tmp
+USER 65534:65534
+ENTRYPOINT ["python", "-I", "/worker.py"]

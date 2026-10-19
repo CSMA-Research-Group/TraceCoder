@@ -1,0 +1,34 @@
+{
+  "id": "classeval-brackets",
+  "title": "括号匹配的残留栈",
+  "subtitle": "ClassEval_7 · 类方法与对象状态",
+  "dataset": "demo",
+  "tags": [
+    "ClassEval_7",
+    "原始测试",
+    "对象状态"
+  ],
+  "description": "class BalancedBrackets:\n    \"\"\"\n    This is a class that checks for bracket matching\n    \"\"\"\n\n    def __init__(self, expr):\n        \"\"\"\n        Initializes the class with an expression.\n        :param expr: The expression to check for balanced brackets,str.\n        \"\"\"\n        self.stack = []\n        self.left_brackets = [\"(\", \"{\", \"[\"]\n        self.right_brackets = [\")\", \"}\", \"]\"]\n        self.expr = expr\n\n    def clear_expr(self):\n        \"\"\"\n        Clears the expression of all characters that are not brackets.\n        >>> b = BalancedBrackets(\"a(b)c\")\n        >>> b.clear_expr()\n        >>> b.expr\n        '()'\n\n        \"\"\"\n\n    def check_balanced_brackets(self):\n        \"\"\"\n        Checks if the expression has balanced brackets.\n        :return: True if the expression has balanced brackets, False otherwise.\n        >>> b = BalancedBrackets(\"a(b)c\")\n        >>> b.check_balanced_brackets()\n        True\n\n        \"\"\"",
+  "provenance": "题面、15 个 unittest 测试及参考实现来自随附 ClassEval_data.json 的 ClassEval_7。初始缺陷为人为将栈非空分支的 False 改成 True。预设修复恢复原参考实现；通过这组测试不代表覆盖所有未见输入。",
+  "initial_code": "class BalancedBrackets:\n    def __init__(self, expr):\n        self.stack = []\n        self.left_brackets = [\"(\", \"{\", \"[\"]\n        self.right_brackets = [\")\", \"}\", \"]\"]\n        self.expr = expr\n\n    def clear_expr(self):\n        self.expr = ''.join(c for c in self.expr if (c in self.left_brackets or c in self.right_brackets))\n\n    def check_balanced_brackets(self):\n        self.clear_expr()\n        for Brkt in self.expr:\n            if Brkt in self.left_brackets:\n                self.stack.append(Brkt)\n            else:\n                Current_Brkt = self.stack.pop()\n                if Current_Brkt == \"(\":\n                    if Brkt != \")\":\n                        return False\n                if Current_Brkt == \"{\":\n                    if Brkt != \"}\":\n                        return False\n                if Current_Brkt == \"[\":\n                    if Brkt != \"]\":\n                        return False\n        if self.stack:\n            return True\n        return True",
+  "entry_point": "",
+  "test": "import unittest\n\n\nclass BalancedBracketsTestClearExpr(unittest.TestCase):\n    def test_clear_expr(self):\n        b = BalancedBrackets(\"a(b)c\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"()\")\n\n    def test_clear_expr_2(self):\n        b = BalancedBrackets(\"a(b){c}\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"(){}\")\n\n    def test_clear_expr_3(self):\n        b = BalancedBrackets(\"[a](b){c}\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"[](){}\")\n\n    def test_clear_expr_4(self):\n        b = BalancedBrackets(\"[a(b){c}\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"[(){}\")\n\n    def test_clear_expr_5(self):\n        b = BalancedBrackets(\"a(b){c}]\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"(){}]\")\n\n\nclass BalancedBracketsTestCheckBalancedBrackets(unittest.TestCase):\n    def test_check_balanced_brackets(self):\n        b = BalancedBrackets(\"a(b)c\")\n        self.assertEqual(b.check_balanced_brackets(), True)\n\n    def test_check_balanced_brackets_2(self):\n        b = BalancedBrackets(\"a(b){c}\")\n        self.assertEqual(b.check_balanced_brackets(), True)\n\n    def test_check_balanced_brackets_3(self):\n        b = BalancedBrackets(\"[a](b){c}\")\n        self.assertEqual(b.check_balanced_brackets(), True)\n\n    def test_check_balanced_brackets_4(self):\n        b = BalancedBrackets(\"[a(b){c}\")\n        self.assertEqual(b.check_balanced_brackets(), False)\n\n    def test_check_balanced_brackets_5(self):\n        b = BalancedBrackets(\"a(b{c}]\")\n        self.assertEqual(b.check_balanced_brackets(), False)\n\n    def test_check_balanced_brackets_6(self):\n        b = BalancedBrackets(\"a(b{c]]\")\n        self.assertEqual(b.check_balanced_brackets(), False)\n\n    def test_check_balanced_brackets_7(self):\n        b = BalancedBrackets(\"[a)(b){c}\")\n        self.assertEqual(b.check_balanced_brackets(), False)\n\n\nclass BalancedBracketsTestMain(unittest.TestCase):\n    def test_main(self):\n        b = BalancedBrackets(\"a(b)c\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"()\")\n        self.assertEqual(b.check_balanced_brackets(), True)\n\n    def test_main_2(self):\n        b = BalancedBrackets(\"[a(b){c}\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"[(){}\")\n        self.assertEqual(b.check_balanced_brackets(), False)\n\n    def test_main_3(self):\n        b = BalancedBrackets(\"a(b{c}]\")\n        b.clear_expr()\n        self.assertEqual(b.expr, \"({}]\")\n        self.assertEqual(b.check_balanced_brackets(), False)",
+  "steps": [
+    {
+      "analysis": {
+        "root_cause": "遍历结束后若栈仍有左括号，说明存在未闭合括号，当前却返回 True。",
+        "evidence": [
+          "输入 [a(b){c} 过滤成 [(){}，仍有左括号 [ 留在栈中。",
+          "失败集中于未闭合表达式，clear_expr 测试仍通过。"
+        ],
+        "lesson_feedback": "尚无历史修复；保留字符过滤与成对匹配逻辑。",
+        "repair_plan": [
+          "仅将循环后 self.stack 非空的返回值改为 False。"
+        ],
+        "instrumentation_suggestions": "在最后的栈非空判断前观察 self.stack。"
+      },
+      "code": "class BalancedBrackets:\n    def __init__(self, expr):\n        self.stack = []\n        self.left_brackets = [\"(\", \"{\", \"[\"]\n        self.right_brackets = [\")\", \"}\", \"]\"]\n        self.expr = expr\n\n    def clear_expr(self):\n        self.expr = ''.join(c for c in self.expr if (c in self.left_brackets or c in self.right_brackets))\n\n    def check_balanced_brackets(self):\n        self.clear_expr()\n        for Brkt in self.expr:\n            if Brkt in self.left_brackets:\n                self.stack.append(Brkt)\n            else:\n                Current_Brkt = self.stack.pop()\n                if Current_Brkt == \"(\":\n                    if Brkt != \")\":\n                        return False\n                if Current_Brkt == \"{\":\n                    if Brkt != \"}\":\n                        return False\n                if Current_Brkt == \"[\":\n                    if Brkt != \"]\":\n                        return False\n        if self.stack:\n            return False\n        return True",
+      "change_summary": "栈非空时返回 False，恢复随附参考实现。"
+    }
+  ]
+}

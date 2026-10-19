@@ -1,0 +1,84 @@
+{
+  "scope": "Real Chrome interactions; no external model calls",
+  "official_examples_loaded": 12,
+  "generation_saved": "t-860c242ec55c",
+  "generation_revision": 1,
+  "model_run_disabled_when_unconfigured": true,
+  "project_generation_edit_verified": true,
+  "fixture_run": "20261019T015440Z-f65c802a60",
+  "fixture_result": "6/7 -> 0/7 rollback -> 7/7",
+  "history_deep_link_reload": true,
+  "responsive_checks": [
+    {
+      "page": "/workbench",
+      "width": 390,
+      "scrollWidth": 384
+    },
+    {
+      "page": "/",
+      "scrollWidth": 384,
+      "views": [
+        "view-overview"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/generate",
+      "scrollWidth": 384,
+      "views": [
+        "view-generate"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/projects",
+      "scrollWidth": 384,
+      "views": [
+        "view-projects"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/history",
+      "scrollWidth": 384,
+      "views": [
+        "view-runs"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/examples",
+      "scrollWidth": 384,
+      "views": [
+        "view-examples"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/settings",
+      "scrollWidth": 384,
+      "views": [
+        "view-settings"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/deployment",
+      "scrollWidth": 384,
+      "views": [
+        "view-deployment"
+      ],
+      "width": 390
+    },
+    {
+      "page": "/help",
+      "scrollWidth": 384,
+      "views": [
+        "view-help"
+      ],
+      "width": 390
+    }
+  ],
+  "console_errors": [],
+  "viewport_reset": true
+}

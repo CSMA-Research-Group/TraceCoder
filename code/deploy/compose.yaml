@@ -1,0 +1,20 @@
+services:
+  demo:
+    build:
+      context: ../..
+      dockerfile: code/Dockerfile
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - state:/app/state
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: 1
+    restart: unless-stopped
+volumes:
+  state:

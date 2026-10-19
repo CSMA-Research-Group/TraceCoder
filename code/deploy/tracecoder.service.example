@@ -1,0 +1,31 @@
+# Live mode: a dedicated Linux worker host with Docker, behind HTTPS nginx.
+# Install at /etc/systemd/system/tracecoder.service after adapting these paths.
+[Unit]
+Description=TraceCoder code repair system
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=tracecoder
+Group=tracecoder
+# Access to Docker is an administrative capability: use a dedicated host/account.
+SupplementaryGroups=docker
+WorkingDirectory=/opt/TraceCoder/code
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=TRACECODER_STATE_DIR=/var/lib/tracecoder
+StateDirectory=tracecoder
+UMask=0077
+EnvironmentFile=/etc/tracecoder.env
+ExecStart=/opt/TraceCoder/code/.venv/bin/python /opt/TraceCoder/code/app.py --host 0.0.0.0 --port 8765
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=120
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/tracecoder
+
+[Install]
+WantedBy=multi-user.target

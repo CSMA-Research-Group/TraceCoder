@@ -1,0 +1,24 @@
+# Local reference checkouts and published-paper input.
+/news/
+/*.pdf
+
+# Local environments, credentials and generated files.
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Per-instance state and preservation snapshots stay on the host.
+/data/runs/
+/data/workspace/
+/data/backups/
+
+# Publish the current acceptance evidence and complete release package.
+/data/verification/*
+!/data/verification/integration-v2.1/
+/code/docs/VERIFICATION.md
+/code/releases/TraceCoder-2.0.0.*

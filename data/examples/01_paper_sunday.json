@@ -1,0 +1,50 @@
+{
+  "id": "paper-sunday",
+  "title": "下一个星期日",
+  "subtitle": "论文 Figure 1 · 回滚与历史学习",
+  "dataset": "demo",
+  "tags": [
+    "论文示例",
+    "2 轮修复",
+    "HLLM + RM"
+  ],
+  "description": "输入今天的星期缩写 SUN、MON、TUE、WED、THU、FRI 或 SAT，返回距离下一个星期日的天数（从明天起算）。例如 MON → 6，WED → 4，SUN → 7。",
+  "provenance": "题意和初始缺陷改编自论文 Figure 1；提取 index/remaining 便于观察。7 个测试由本复现补全。第一轮失败候选和第二轮正确候选均为人工编写，用于稳定展示回滚和历史学习。",
+  "initial_code": "def next_sunday(day):\n    days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']\n    index = days.index(day)\n    remaining = (7 - index) % 7\n    return remaining\n",
+  "entry_point": "next_sunday",
+  "test": "import unittest\n\nclass SundayTests(unittest.TestCase):\n    def test_sun(self):\n        self.assertEqual(next_sunday('SUN'), 7)\n\n    def test_mon(self):\n        self.assertEqual(next_sunday('MON'), 6)\n\n    def test_tue(self):\n        self.assertEqual(next_sunday('TUE'), 5)\n\n    def test_wed(self):\n        self.assertEqual(next_sunday('WED'), 4)\n\n    def test_thu(self):\n        self.assertEqual(next_sunday('THU'), 3)\n\n    def test_fri(self):\n        self.assertEqual(next_sunday('FRI'), 2)\n\n    def test_sat(self):\n        self.assertEqual(next_sunday('SAT'), 1)\n\n",
+  "steps": [
+    {
+      "analysis": {
+        "root_cause": "预设的失败假设：怀疑日期偏移常量有误，尝试整体减 1。此轮故意保留错误方案以展示回滚。",
+        "evidence": [
+          "SUN 的 index=0，remaining=0，预期为 7；其他日期当前通过。"
+        ],
+        "lesson_feedback": "尚无历史修复记录。",
+        "repair_plan": [
+          "将 remaining 中的常量 7 改为 6，并由固定测试验证该假设。"
+        ],
+        "instrumentation_suggestions": "观察所有日期的 index 和 remaining，确认是否破坏原本通过的日期。"
+      },
+      "code": "def next_sunday(day):\n    days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']\n    index = days.index(day)\n    remaining = (6 - index) % 7\n    return remaining\n",
+      "change_summary": "预设失败候选：7 → 6；真实测试将检测到退化。"
+    },
+    {
+      "analysis": {
+        "root_cause": "模 7 将 SUN 对应的 7 变成 0；题目要求至少等待一天。索引本身没有偏移。",
+        "evidence": [
+          "回滚后 SUN: index=0, remaining=0。",
+          "前次将 7 改成 6 使原本正确的 MON/WED 等日期也失败。"
+        ],
+        "lesson_feedback": "历史记录显示整体偏移破坏了全部日期。保留 7-index，移除将 7 压回 0 的取模。",
+        "repair_plan": [
+          "从回滚后的历史最优代码开始。",
+          "将 remaining 改为 7 - index，保留全部日期的索引规则。"
+        ],
+        "instrumentation_suggestions": "若仍失败，继续记录 index 与 remaining，重点检查 SUN 和 SAT。"
+      },
+      "code": "def next_sunday(day):\n    days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']\n    index = days.index(day)\n    remaining = 7 - index\n    return remaining\n",
+      "change_summary": "删除取模，SUN 返回 7，其他日期保持正确。"
+    }
+  ]
+}

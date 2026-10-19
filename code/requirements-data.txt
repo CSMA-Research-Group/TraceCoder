@@ -1,0 +1,2 @@
+# Only needed to rebuild the already-shipped JSONL conversions from parquet.
+pyarrow>=17,<24

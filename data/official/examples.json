@@ -1,0 +1,146 @@
+[
+  {
+    "id": "example1",
+    "name": "两数之和",
+    "category": "array",
+    "difficulty": "easy",
+    "description": "给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出和为目标值 target 的那两个整数，并返回它们的数组下标。",
+    "test_case": "assert two_sum([2, 7, 11, 15], 9) == [0, 1]\nassert two_sum([3, 2, 4], 6) == [1, 2]\nassert two_sum([3, 3], 6) == [0, 1]",
+    "hints": [
+      "可以使用哈希表优化查找",
+      "注意处理重复元素的情况"
+    ]
+  },
+  {
+    "id": "example2",
+    "name": "回文数判断",
+    "category": "math",
+    "difficulty": "easy",
+    "description": "给你一个整数 x ，如果 x 是一个回文整数，返回 true ；否则，返回 false 。回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。",
+    "test_case": "assert is_palindrome(121) == True\nassert is_palindrome(-121) == False\nassert is_palindrome(10) == False\nassert is_palindrome(0) == True",
+    "hints": [
+      "负数不是回文数",
+      "可以转换为字符串处理"
+    ]
+  },
+  {
+    "id": "example3",
+    "name": "斐波那契数列",
+    "category": "algorithm",
+    "difficulty": "easy",
+    "description": "计算斐波那契数列的第n项。斐波那契数列定义为：F(0) = 0, F(1) = 1, F(n) = F(n-1) + F(n-2) (n > 1)",
+    "test_case": "assert fibonacci(0) == 0\nassert fibonacci(1) == 1\nassert fibonacci(2) == 1\nassert fibonacci(3) == 2\nassert fibonacci(4) == 3\nassert fibonacci(5) == 5",
+    "hints": [
+      "注意基础情况的处理",
+      "可以使用动态规划优化"
+    ]
+  },
+  {
+    "id": "example4",
+    "name": "快速排序",
+    "category": "algorithm",
+    "difficulty": "medium",
+    "description": "实现快速排序算法，对整数数组进行升序排列。要求处理各种边界情况，包括空数组、单元素数组、重复元素等。",
+    "test_case": "assert quick_sort([]) == []\nassert quick_sort([1]) == [1]\nassert quick_sort([1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]\nassert quick_sort([5, 4, 3, 2, 1]) == [1, 2, 3, 4, 5]\nassert quick_sort([3, 6, 8, 10, 1, 2, 1]) == [1, 1, 2, 3, 6, 8, 10]",
+    "hints": [
+      "选择合适的基准元素",
+      "注意递归终止条件"
+    ]
+  },
+  {
+    "id": "example5",
+    "name": "最长公共前缀",
+    "category": "string",
+    "difficulty": "easy",
+    "description": "编写一个函数来查找字符串数组中的最长公共前缀。如果不存在公共前缀，返回空字符串 \"\"。",
+    "test_case": "assert longest_common_prefix([\"flower\",\"flow\",\"flight\"]) == \"fl\"\nassert longest_common_prefix([\"dog\",\"racecar\",\"car\"]) == \"\"\nassert longest_common_prefix([\"a\"]) == \"a\"",
+    "hints": [
+      "可以从第一个字符串开始比较",
+      "注意空数组的情况"
+    ]
+  },
+  {
+    "id": "example6",
+    "name": "二叉树遍历",
+    "category": "data-structure",
+    "difficulty": "medium",
+    "description": "实现二叉树的前序、中序、后序遍历。给定二叉树的根节点，返回对应遍历顺序的节点值列表。",
+    "test_case": "root = TreeNode(1)\nroot.right = TreeNode(2)\nroot.right.left = TreeNode(3)\nassert preorder_traversal(root) == [1, 2, 3]\nassert inorder_traversal(root) == [1, 3, 2]\nassert postorder_traversal(root) == [3, 2, 1]",
+    "hints": [
+      "可以使用递归或迭代实现",
+      "注意处理空树的情况"
+    ]
+  },
+  {
+    "id": "example7",
+    "name": "合并两个有序链表",
+    "category": "data-structure",
+    "difficulty": "easy",
+    "description": "将两个升序链表合并为一个新的升序链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的。",
+    "test_case": "l1 = ListNode(1, ListNode(2, ListNode(4)))\nl2 = ListNode(1, ListNode(3, ListNode(4)))\nresult = merge_two_lists(l1, l2)\nassert list_to_array(result) == [1, 1, 2, 3, 4, 4]",
+    "hints": [
+      "使用迭代或递归方法",
+      "注意处理空链表"
+    ]
+  },
+  {
+    "id": "example8",
+    "name": "最长无重复子串",
+    "category": "string",
+    "difficulty": "medium",
+    "description": "给定一个字符串 s ，请你找出其中不含有重复字符的最长子串的长度。",
+    "test_case": "assert length_of_longest_substring(\"abcabcbb\") == 3\nassert length_of_longest_substring(\"bbbbb\") == 1\nassert length_of_longest_substring(\"pwwkew\") == 3",
+    "hints": [
+      "使用滑动窗口",
+      "可以用哈希集合优化"
+    ]
+  },
+  {
+    "id": "example9",
+    "name": "三数之和",
+    "category": "array",
+    "difficulty": "hard",
+    "description": "给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。返回所有满足条件且不重复的三元组。",
+    "test_case": "result = three_sum([-1,0,1,2,-1,-4])\nassert sorted([sorted(t) for t in result]) == sorted([[-1,-1,2],[-1,0,1]])\nassert three_sum([]) == []\nassert three_sum([0]) == []",
+    "hints": [
+      "先排序再双指针",
+      "注意去重"
+    ]
+  },
+  {
+    "id": "example10",
+    "name": "动态规划-爬楼梯",
+    "category": "algorithm",
+    "difficulty": "easy",
+    "description": "假设你正在爬楼梯。需要 n 阶你才能到达楼顶。每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶？",
+    "test_case": "assert climb_stairs(1) == 1\nassert climb_stairs(2) == 2\nassert climb_stairs(3) == 3\nassert climb_stairs(4) == 5\nassert climb_stairs(5) == 8",
+    "hints": [
+      "这是斐波那契数列的变种",
+      "使用动态规划避免重复计算"
+    ]
+  },
+  {
+    "id": "example11",
+    "name": "二分查找",
+    "category": "algorithm",
+    "difficulty": "easy",
+    "description": "给定一个 n 个元素有序的（升序）整型数组 nums 和一个目标值 target ，写一个函数搜索 nums 中的 target，如果目标值存在返回下标，否则返回 -1。",
+    "test_case": "assert binary_search([-1,0,3,5,9,12], 9) == 4\nassert binary_search([-1,0,3,5,9,12], 2) == -1\nassert binary_search([5], 5) == 0",
+    "hints": [
+      "注意边界条件",
+      "使用左右指针"
+    ]
+  },
+  {
+    "id": "example12",
+    "name": "有效的括号",
+    "category": "string",
+    "difficulty": "easy",
+    "description": "给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串 s ，判断字符串是否有效。有效字符串需满足：左括号必须用相同类型的右括号闭合，左括号必须以正确的顺序闭合。",
+    "test_case": "assert is_valid_parentheses(\"()\") == True\nassert is_valid_parentheses(\"()[]{}\") == True\nassert is_valid_parentheses(\"(]\") == False\nassert is_valid_parentheses(\"([)]\") == False\nassert is_valid_parentheses(\"{[]}\") == True",
+    "hints": [
+      "使用栈数据结构",
+      "注意括号的配对"
+    ]
+  }
+]

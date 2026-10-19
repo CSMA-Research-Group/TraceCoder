@@ -1,0 +1,77 @@
+{
+  "repository": "https://github.com/CSMA-Research-Group/TraceCoder",
+  "main": "cbd536eb5a02b53ee835cae2f07f5b7ed8bb694d",
+  "TraceCoder-WebDemo": "49beb48ce6d62cfd97b4714fbc8c1887879af43f",
+  "relationship": "Independent upstream histories; integrated by explicit source mapping, not a Git merge.",
+  "files": [
+    {
+      "branch": "main",
+      "path": "problem_processor.py",
+      "sha256": "5d25ba0468fb4c810a8c6fb39ac2fbdd9c74717c5b3d4a099cb94bb1c2d52ae0"
+    },
+    {
+      "branch": "main",
+      "path": "src/traceRunner.py",
+      "sha256": "b234bac72b0d6a57a09d09c8d2beff1b71ea168bc5bc752bfa93852df3cb405e"
+    },
+    {
+      "branch": "main",
+      "path": "trace_learn_coder.py",
+      "sha256": "ef15cec3defdaae4ecfb73797c1ab396c140b30595bf2bf2adfe1734152aeef0"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/app.py",
+      "sha256": "91aa3cb8e17e970debf6131008ff7595b67ae6c62cf47537433de1ff0a0412bb"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/trace_runner.py",
+      "sha256": "3bf9b9747d74df07712246dfa8644660390aa0d4cd46b6193fc25fb33d3ccd3e"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/base.html",
+      "sha256": "2faa8f88a15638eddfbc48712606b3948e6818e1af9be2b30c0360d3c9350c6c"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/home.html",
+      "sha256": "e48bf367f7a5c495e938d11fab5c024024d52350e2ee1ec238250e0becdeee10"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/generate.html",
+      "sha256": "405f176153a0d4701642a6838c4049d57459ac01d36a11fe03b6d33fb1bb816c"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/history.html",
+      "sha256": "d83a6962d662fa7209e873d6fa3f91704945965bd4bef94d2882c9e9a251d1a9"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/examples.html",
+      "sha256": "979df9df3ff1a42a4c9ea11a4d1ffec525b0d363a8b095bc63b5a77aff66ec90"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/settings.html",
+      "sha256": "8630ecfc5d806c6827c530362e62c2ffac1f5a7eaa048f6e9dad7dff521b8a09"
+    },
+    {
+      "branch": "TraceCoder-WebDemo",
+      "path": "web_demo/templates/help.html",
+      "sha256": "114b796654db608de2c2e0b211bd43f5b45352cb3e26f33aae09e9f2f6a947b9"
+    }
+  ],
+  "mapping": {
+    "official_prompts.py": "Three official prompt builders retained verbatim; full HLLM history replaces last-two plan-only history.",
+    "web_demo/app.py": "Official Flask page routes and generation API retained; global runner replaced by per-job shared service.",
+    "web_demo/templates": "Official page organization and entry flow retained; interface rewritten with local assets and durable projects.",
+    "data/official/examples.json": "12 original WebDemo example objects, unchanged.",
+    "tracecoder/engine.py": "Local audited implementation of paper Algorithms 1 and 2, shared by web/CLI/API; replaces upstream strict-improvement-only loop.",
+    "tracecoder/worker.py": "Structured per-case results replace upstream output-string parser; supports original assert examples, unittest and check(candidate)."
+  },
+  "license_note": "No LICENSE file was found in either upstream branch. No third-party relicensing is asserted. Confirm distribution terms with the owning research group before external redistribution."
+}

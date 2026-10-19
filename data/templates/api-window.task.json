@@ -1,0 +1,8 @@
+{
+  "title": "API 请求窗口边界",
+  "description": "统计 API 网关在最近 window 秒内的请求数。输入 timestamps 为数值时间戳列表，now 为当前时间，window 为正数。时间窗口定义为 (now - window, now]：恰好落在窗口左端的请求已过期，右端计入；排除未来请求，允许重复和无序时间戳。返回非负整数，不修改输入。",
+  "initial_code": "def count_recent(timestamps, now, window):\n    start = now - window\n    count = 0\n    for timestamp in timestamps:\n        if start <= timestamp <= now:\n            count += 1\n    return count\n",
+  "test": "import unittest\n\nclass WindowTests(unittest.TestCase):\n    def test_left_boundary_excluded(self):\n        self.assertEqual(count_recent([40, 41, 99, 100], 100, 60), 3)\n\n    def test_right_boundary_included(self):\n        self.assertEqual(count_recent([100], 100, 60), 1)\n\n    def test_future_events_excluded(self):\n        self.assertEqual(count_recent([101, 102], 100, 60), 0)\n\n    def test_expired_events_excluded(self):\n        self.assertEqual(count_recent([1, 20, 39], 100, 60), 0)\n\n    def test_empty_window(self):\n        self.assertEqual(count_recent([], 100, 60), 0)\n\n    def test_repeated_boundary_events(self):\n        self.assertEqual(count_recent([40, 40, 41], 100, 60), 1)\n",
+  "entry_point": "count_recent",
+  "source_ref": "example://api-gateway/window-counter; authored scenario"
+}

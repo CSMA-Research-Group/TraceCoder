@@ -1,0 +1,438 @@
+{
+  "passed": true,
+  "scope": "isolated HTTP + real fixture execution + CI prepare-only; no model request or Docker execution",
+  "checks": [
+    {
+      "path": "/healthz",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "path": "/api/config",
+      "expected": 403,
+      "actual": 403
+    },
+    {
+      "path": "/api/projects",
+      "expected": 403,
+      "actual": 403
+    },
+    {
+      "path": "/api/projects",
+      "expected": 415,
+      "actual": 415
+    },
+    {
+      "path": "/.env",
+      "expected": 404,
+      "actual": 404
+    },
+    {
+      "path": "/api/runs/not-a-run",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/api/config",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "path": "/api/templates",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects/p-d5079c49e2c3/tasks",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "path": "/api/projects/p-d5079c49e2c3/tasks/t-ead5e49b8d67",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "path": "/api/project-tasks/t-ead5e49b8d67?revision=1",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/project-tasks/t-ead5e49b8d67/revisions",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects/p-d5079c49e2c3/tasks",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/api/runs",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/api/runs",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/api/runs",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/api/runs",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/api/tasks",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs",
+      "expected": 202,
+      "actual": 202
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c/export",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c/bundle",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c/report",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs",
+      "expected": 202,
+      "actual": 202
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20/export",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20/bundle",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-fa18176e20/report",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs",
+      "expected": 202,
+      "actual": 202
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769/export",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769/bundle",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-52b39a6769/report",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs",
+      "expected": 202,
+      "actual": 202
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67/export",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67/bundle",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015532Z-53c5994e67/report",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/overview",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/search?mode=fixture&limit=2",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/search?mode=fixture&limit=2&offset=2",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/search?mode=live",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/search?status=invalid",
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "path": "/healthz",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs/20261019T015531Z-17a361673c",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/project-tasks/t-ead5e49b8d67?revision=1",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/healthz",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/projects",
+      "expected": 403,
+      "actual": 403
+    },
+    {
+      "path": "/api/projects/p-d5079c49e2c3",
+      "expected": 404,
+      "actual": 404
+    },
+    {
+      "path": "/api/project-tasks/t-ead5e49b8d67",
+      "expected": 404,
+      "actual": 404
+    },
+    {
+      "path": "/api/runs/20261018T000000Z-aaaaaaaaaa",
+      "expected": 404,
+      "actual": 404
+    },
+    {
+      "path": "/api/runs/search?mode=live",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/overview",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/overview",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/runs",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "path": "/api/config",
+      "expected": 200,
+      "actual": 200
+    }
+  ],
+  "runs": [
+    {
+      "id": "20261019T015531Z-17a361673c",
+      "task": "paper-sunday",
+      "initial": 6,
+      "final": 7,
+      "total": 7,
+      "rounds": 2
+    },
+    {
+      "id": "20261019T015531Z-fa18176e20",
+      "task": "humaneval-balance",
+      "initial": 5,
+      "final": 6,
+      "total": 6,
+      "rounds": 1
+    },
+    {
+      "id": "20261019T015532Z-52b39a6769",
+      "task": "classeval-brackets",
+      "initial": 13,
+      "final": 15,
+      "total": 15,
+      "rounds": 1
+    },
+    {
+      "id": "20261019T015532Z-53c5994e67",
+      "task": "api-window",
+      "initial": 4,
+      "final": 6,
+      "total": 6,
+      "rounds": 1
+    }
+  ],
+  "restart_persistence": true,
+  "public_private_isolation": true,
+  "ci_prepare_only": true
+}

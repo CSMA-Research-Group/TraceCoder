@@ -1,0 +1,35 @@
+{
+  "id": "api-window",
+  "dataset": "demo",
+  "title": "API 请求窗口边界",
+  "subtitle": "应用场景 · 网关限流统计",
+  "description": "统计 API 网关在最近 window 秒内的请求数。输入 timestamps 为数值时间戳列表，now 为当前时间，window 为正数。时间窗口定义为 (now - window, now]：恰好落在窗口左端的请求已过期，右端计入；排除未来请求，允许重复和无序时间戳。返回非负整数，不修改输入。",
+  "initial_code": "def count_recent(timestamps, now, window):\n    start = now - window\n    count = 0\n    for timestamp in timestamps:\n        if start <= timestamp <= now:\n            count += 1\n    return count\n",
+  "test": "import unittest\n\nclass WindowTests(unittest.TestCase):\n    def test_left_boundary_excluded(self):\n        self.assertEqual(count_recent([40, 41, 99, 100], 100, 60), 3)\n\n    def test_right_boundary_included(self):\n        self.assertEqual(count_recent([100], 100, 60), 1)\n\n    def test_future_events_excluded(self):\n        self.assertEqual(count_recent([101, 102], 100, 60), 0)\n\n    def test_expired_events_excluded(self):\n        self.assertEqual(count_recent([1, 20, 39], 100, 60), 0)\n\n    def test_empty_window(self):\n        self.assertEqual(count_recent([], 100, 60), 0)\n\n    def test_repeated_boundary_events(self):\n        self.assertEqual(count_recent([40, 40, 41], 100, 60), 1)\n",
+  "entry_point": "count_recent",
+  "tags": [
+    "API 网关",
+    "边界回归",
+    "6 项测试"
+  ],
+  "provenance": "为系统应用展示编写的业务场景；并非真实生产缺陷或论文基准任务。智能体响应为预设，每次实际执行测试。",
+  "steps": [
+    {
+      "code": "def count_recent(timestamps, now, window):\n    start = now - window\n    count = 0\n    for timestamp in timestamps:\n        if start < timestamp <= now:\n            count += 1\n    return count\n",
+      "change_summary": "将时间窗口左边界由闭区间改为开区间，保留右边界与未来事件过滤。",
+      "analysis": {
+        "root_cause": "窗口规范为 (now - window, now]，当前条件把已过期的左端时间戳计入，导致限流计数偏大。",
+        "evidence": [
+          "左端边界测试中 start = 40，timestamp = 40 被计入。",
+          "重复边界测试包含两个时间戳 40，错误地得到 3，期望为 1。"
+        ],
+        "lesson_feedback": "当前为首轮修复，尚无失败候选。",
+        "repair_plan": [
+          "仅把 start <= timestamp 改为 start < timestamp。",
+          "保留 timestamp <= now，避免计入未来请求。"
+        ],
+        "instrumentation_suggestions": "跟踪 start、timestamp 与 count，确认左端请求不增加计数。"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "humaneval-balance",
+  "title": "账户余额的中间状态",
+  "subtitle": "HumanEval/3 · 控制流与状态轨迹",
+  "dataset": "demo",
+  "tags": [
+    "HumanEval/3",
+    "原始测试",
+    "中间状态"
+  ],
+  "description": "from typing import List\n\n\ndef below_zero(operations: List[int]) -> bool:\n    \"\"\" You're given a list of deposit and withdrawal operations on a bank account that starts with\n    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and\n    at that point function should return True. Otherwise it should return False.\n    >>> below_zero([1, 2, 3])\n    False\n    >>> below_zero([1, 2, -4, 5])\n    True\n    \"\"\"\n",
+  "provenance": "题面和全部 6 个断言直接来自随附 HumanEval.jsonl.gz 的 HumanEval/3。初始代码及智能体响应为人工编写的教学缺陷，不宣称来自模型。",
+  "initial_code": "def below_zero(operations):\n    balance = sum(operations)\n    return balance < 0\n",
+  "entry_point": "below_zero",
+  "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate([]) == False\n    assert candidate([1, 2, -3, 1, 2, -3]) == False\n    assert candidate([1, 2, -4, 5, 6]) == True\n    assert candidate([1, -1, 2, -2, 5, -5, 4, -4]) == False\n    assert candidate([1, -1, 2, -2, 5, -5, 4, -5]) == True\n    assert candidate([1, -2, 2, -2, 5, -5, 4, -4]) == True\n",
+  "steps": [
+    {
+      "analysis": {
+        "root_cause": "程序只观察最终余额，遗漏了中途透支后再次入账的情况。",
+        "evidence": [
+          "操作 [1, 2, -4, 5, 6] 的最终 balance=10，但第三次操作后余额为 -1。"
+        ],
+        "lesson_feedback": "尚无历史失败方案；应检查每次状态变化，而非只替换最终比较符号。",
+        "repair_plan": [
+          "从余额 0 开始逐条执行操作。",
+          "每次更新后立即判断余额是否小于 0；出现负数即返回 True。",
+          "遍历完成且未透支时返回 False。"
+        ],
+        "instrumentation_suggestions": "在 balance += op 后记录余额和当前操作。"
+      },
+      "code": "def below_zero(operations):\n    balance = 0\n    for op in operations:\n        balance += op\n        if balance < 0:\n            return True\n    return False\n",
+      "change_summary": "将最终求和改为逐操作检查。"
+    }
+  ]
+}
